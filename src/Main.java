@@ -2,9 +2,17 @@ import java.util.*;
 import java.io.*;
 
 public class Main {
-    static String[][] deck;
+    /* Declarations for variables related to the Deck */
+    static int[][] deck;
+    static String[] entries;
+
+    /* Declarations for variables related to Score */
+    int highscore = -1;
+
+    /* Declaration of Objects */
     static Scanner input;
 
+    /* Declaration for Console Colors */
     public static final String RESET = "\033[0m";
     public static final String YELLOW = "\033[0;33m";
     public static final String PURPLE_BOLD_BRIGHT = "\033[1;95m";
@@ -12,19 +20,43 @@ public class Main {
     public static void main(String[] args) {
         input = new Scanner(System.in);
 
+        /* Generate a default deck of cards */
         String[] DefaultItems = {"a", "b", "c", "d", "e", "f", "g"};
+        GenerateDeck(3, DefaultItems);
 
-        // Running methods
+        /* Menu Methods */
         init_main_menu();
         main_menu();
     }
 
+    /* Helper Methods */
+
+    /**
+     * readInt prompts the user for an int
+     */
+    public static int readInt(String prompt) {
+        System.out.print(prompt);
+        return input.nextInt();
+    }
+
+    /**
+     * readInt prompts the user for a String
+     */
+    public static String readLine(String prompt) {
+        System.out.print(prompt);
+        return input.nextLine();
+    }
+
+    /**
+     *  Get the total number of images based on the amount of images per card
+     */
     public static int getNumberOfImages(int num_of_images_per_card) {
         return (int) Math.pow(num_of_images_per_card, 2) - num_of_images_per_card + 1;
     }
 
+    // dw abt this stuff yet this is poorly written code i wrote on a whim
     public static int pickIndex(boolean[] selected) {
-        int index = -1;
+        int index;
         int length = selected.length;
 
         do {
@@ -34,6 +66,7 @@ public class Main {
         return index;
     }
 
+    // ignore this to
     public static void ShuffleDeck(boolean withRemoval, int iterations) {
         boolean[] selected = new boolean[deck.length];
         int second = pickIndex(selected);
@@ -46,11 +79,10 @@ public class Main {
             int first = pickIndex(selected);
             selected[first] = true;
 
-
             int cardLength = deck[0].length;
 
             for (int idx = 0;idx < cardLength;idx++) {
-                String a = deck[first][idx];
+                int a = deck[first][idx];
                 deck[first][idx] = deck[second][idx];
                 deck[second][idx] = a;
             }
@@ -63,6 +95,7 @@ public class Main {
         }
     }
 
+    // this too
     public static void ShuffleCard(int card, boolean withRemoval, int iterations) {
         boolean[] selected = new boolean[deck[card].length];
         int cardLength = deck[card].length;
@@ -77,7 +110,7 @@ public class Main {
 
             int second = pickIndex(selected);
 
-            String a = deck[card][first];
+            int a = deck[card][first];
             deck[card][first] = deck[card][second];
             deck[card][second] = a;
 
@@ -89,50 +122,107 @@ public class Main {
         }
     }
 
+    /**
+     * Generates the deck given the images per card and a list of images
+     * For now it will only produce a deck of cards with 3 images per card
+     */
     public static void GenerateDeck(int num_of_images_per_card, String[] items) {
 
         int num_of_cards = getNumberOfImages(num_of_images_per_card);
 
-//        int[][] deckIndex = new int[num_of_cards][num_of_images_per_card];
-
-        int[][] deckIndex = {
+        deck = new int[][]{
             {0, 1, 2},
             {0, 3, 4},
             {0, 5, 6},
             {1, 3, 5},
             {1, 4, 6},
-            {2, 3, 6},
             {2, 4, 5},
+            {2, 3, 6},
         };
 
-
-        deck = new String[num_of_cards][num_of_images_per_card];
-
-        for (int i = 0;i < deck.length;i++) {
-            for (int j = 0;j < deck[i].length;j++) {
-                int idx = deckIndex[i][j];
-                deck[i][j] = items[idx];
-            }
-        }
+        entries = items;
     }
 
     /**
      * Loading screen
+     * TODO: We can add cool effects to make the laoding screen cool
      */
     public static void init_main_menu() {
         System.out.println(
-            "  _________              __    .__  __   \n" +
-            " /   _____/_____   _____/  |_  |__|/  |_ \n" +
-            " \\_____  \\\\____ \\ /  _ \\   __\\ |  \\   __\\\n" +
-            " /        \\  |_> >  <_> )  |   |  ||  |  \n" +
-            "/_______  /   __/ \\____/|__|   |__||__|  \n" +
-            "        \\/|__|                           \n" +
-            "__________________________________________\n"
+            """
+              _________              __    .__  __  \s
+             /   _____/_____   _____/  |_  |__|/  |_\s
+             \\_____  \\\\____ \\ /  _ \\   __\\ |  \\   __\\
+             /        \\  |_> >  <_> )  |   |  ||  | \s
+            /_______  /   __/ \\____/|__|   |__||__| \s
+                    \\/|__|                          \s
+            __________________________________________
+            """
         );
     }
-
+    // lmao
+    // IGNORE THIS DEFINETLY IGNORE THIS
     public static void edit_cards() {
-        int current_images_per_card = deck[0].length;
+        String command;
+
+        do {
+            int current_images_per_card = deck[0].length;
+
+            System.out.println("Enter new Cards [1]");
+            System.out.println("Modify Entry [2]");
+            System.out.println("Exit [E]");
+
+            command = input.nextLine();
+
+            switch (command.toLowerCase()) {
+                case "1":
+                    System.out.printf("Current number of images per Card is %d\n", current_images_per_card);
+                    int new_images_per_card = readInt("Enter the number of images per card! ");
+                    input.nextLine();
+
+                    int num_of_cards = getNumberOfImages(new_images_per_card);
+
+                    System.out.printf("Input %d Cards\n", num_of_cards);
+
+                    String[] items = new String[num_of_cards];
+                    for (int i = 0; i < num_of_cards; i++) {
+                        do {
+                            System.out.printf("No. %d: ", i + 1);
+                            items[i] = input.nextLine();
+                        } while (items[i].isEmpty());
+                    }
+
+                    String response = readLine("Save Selection? [y/n]\n");
+                    if (response.equalsIgnoreCase("y")) {
+                        GenerateDeck(new_images_per_card, items);
+                    }
+
+                    break;
+                case "2":
+                    System.out.println("Current Image Selection:");
+                    for (int i = 0;i < entries.length;i++) {
+                        System.out.printf("No. %d: %s\n", i + 1, entries[i]);
+                    }
+
+                    int index = readInt("Modify Image: ") - 1;
+                    input.nextLine();
+                    String newImage = readLine("What is the new Image? ");
+                    entries[index] = newImage;
+
+                    break;
+                case "e":
+                    continue;
+                default:
+                    System.out.println("Unknown command");
+                    break;
+            }
+
+        } while (!command.equalsIgnoreCase("exit") && !command.equalsIgnoreCase("e"));
+    }
+
+    // This is how the user is going to be able to run the spot-it game
+    public static void start_game() {
+
     }
 
     /**
@@ -144,18 +234,22 @@ public class Main {
 
         do {
 
+            // Main menu Options
             System.out.println("Menu Options");
             System.out.println("Rules [1]");
             System.out.println("Scores [2]");
             System.out.println("New Game [3]");
             System.out.println("Edit Cards [4]");
+            System.out.println("Quit [Q]");
             System.out.println();
 
-            command = input.nextLine().toLowerCase();
+            // Read in the command
+            command = input.nextLine();
 
-            switch (command) {
-                case "new game", "3":
-                    System.out.println("toilet");
+            // Check command against the available options
+            switch (command.toLowerCase()) {
+                case "4":
+                    edit_cards();
                     break;
                 case "debug":
                     debug_console();
@@ -168,26 +262,31 @@ public class Main {
                     break;
             }
             System.out.println();
-        } while (!command.equals("quit"));
+        } while (!command.equalsIgnoreCase("quit") && !command.equalsIgnoreCase("q")); // Continue if the command isn't "quit"
     }
 
+    // Helper method to print out the deck
     public static void print_deck() {
-        for (String[] strings : deck) {
-            for (String string : strings) {
-                System.out.printf("%s, ", string);
+        // btw this is
+        for (int[] indices : deck) {
+            for (int index : indices) {
+                System.out.printf("%s, ", entries[index]);
             }
             System.out.println();
         }
     }
 
+    // This is mainly for testing, this function helps with debugging the program
+    // For example I can easily test deck shuffling, printing, and card generation
+    // without having to go through the actual game itself
+    // typically the user shouldn't have access to this
     public static void debug_console() {
         String command;
 
         System.out.println("Entering Debug Mode");
 
         do {
-            command = input.nextLine().toLowerCase();
-
+            // Debug Options
             System.out.println("Generate a new deck of Cards [1]");
             System.out.println("Shuffle Deck w/ Removal [2]");
             System.out.println("Shuffle Deck w/o Removal [3]");
@@ -195,7 +294,9 @@ public class Main {
             System.out.println("Print current deck [5]");
             System.out.println("Exit [E]");
 
-            switch (command) {
+            command = input.nextLine();
+
+            switch (command.toLowerCase()) {
                 case "generate", "1":
                     int n = getNumberOfImages(3);
 
@@ -227,12 +328,14 @@ public class Main {
                 case "print", "5":
                     print_deck();
                     break;
+                case "exit", "e":
+                    continue;
                 default:
                     System.out.println("Unknown Command");
                     break;
             }
             System.out.println();
-        } while (!command.equals("exit") && !command.equals("e"));
+        } while (!command.equalsIgnoreCase("exit") && !command.equalsIgnoreCase("e"));
 
         System.out.println("Exiting Debug Console...");
     }
