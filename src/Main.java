@@ -27,9 +27,50 @@ public class Main {
         /* Menu Methods */
         init_main_menu();
         main_menu();
+
+    }
+
+    public static void print_card(int[] elements) {
+//        ArrayList<Integer> list = new ArrayList<Integer>(Arrays.asList(elements));
+
+        int length = elements.length;
+        double side = Math.sqrt(length);
+
+        int row = (int) Math.ceil(side);
+        int col = (int) Math.round(side);
+
+        int[][] grid = new int[row][col];
+        int maxLength = 0;
+
+        for (int i = 0;i < row;i++) {
+            int sum = 0;
+            for (int j = 0;j < col;j++) {
+                int index = i * row + col;
+
+                int entryIndex = elements[index];
+                grid[i][j] = entryIndex;
+
+                sum += entries[entryIndex].length();
+            }
+
+            maxLength = Math.max(maxLength, sum);
+        }
+
+
+
+
+
     }
 
     /* Helper Methods */
+
+    /**
+     * Clear Screen
+     */
+    public static void clear() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
 
     /**
      * readInt prompts the user for an int
@@ -52,6 +93,10 @@ public class Main {
      */
     public static int getNumberOfImages(int num_of_images_per_card) {
         return (int) Math.pow(num_of_images_per_card, 2) - num_of_images_per_card + 1;
+    }
+
+    public static void print_header_msg() {
+        System.out.println("---------------------------------------");
     }
 
     // dw abt this stuff yet this is poorly written code i wrote on a whim
@@ -143,6 +188,28 @@ public class Main {
         entries = items;
     }
 
+    public static int FindCommonElement(int firstCard, int secondCard) {
+        boolean[] images = new boolean[deck.length];
+        int images_per_card = deck[firstCard].length;
+
+        for (int i = 0;i < images_per_card;i++) {
+            int firstImage = deck[firstCard][i];
+            int secondImage = deck[secondCard][i];
+
+            if (images[firstImage]) {
+                return firstImage;
+            }
+            images[firstImage] = true;
+
+            if (images[secondImage]) {
+                return secondImage;
+            }
+            images[secondImage] = true;
+        }
+
+        return -1;
+    }
+
     /**
      * Loading screen
      * TODO: We can add cool effects to make the laoding screen cool
@@ -173,6 +240,8 @@ public class Main {
             System.out.println("Exit [E]");
 
             command = input.nextLine();
+
+            print_header_msg();
 
             switch (command.toLowerCase()) {
                 case "1":
@@ -222,7 +291,96 @@ public class Main {
 
     // This is how the user is going to be able to run the spot-it game
     public static void start_game() {
+        String command;
+        int cards = deck.length;
 
+        do {
+            System.out.println("Game Modes");
+            System.out.println("Normal Mode [1]");
+            System.out.println("Endless Mode [2]");
+            System.out.println("Timed Variant [3]");
+            System.out.println("Quit to previous [Q]");
+            System.out.println();
+
+            command = input.nextLine();
+
+            int score;
+            switch (command.toLowerCase()) {
+                case "1":
+                    int rounds = readInt("How many rounds? ");
+                    input.nextLine();
+
+                    score = 0;
+
+                    for (int i = 0;i < rounds;i++) {
+                        int first = (int) (Math.random() * cards);
+                        int second;
+                        do {
+                            second = (int) (Math.random() * cards);
+                        } while (first == second);
+
+                        print_card(first);
+                        print_card(second);
+
+                        String guess = readLine("What's the common element? ").trim();
+                        String correct_answer = entries[FindCommonElement(first, second)];
+
+                        if (guess.equals(correct_answer)) {
+                            System.out.println("Correct! +1");
+                            score++;
+                        } else {
+                            System.out.printf("Not correct :( The correct answer was %s\n", correct_answer);
+                        }
+                    }
+
+                    System.out.printf("%d / %d Correct\n", score, rounds);
+
+                    break;
+                case "2":
+
+                    score = 0;
+                    String guess, correct_answer;
+                    long currentTime = System.currentTimeMillis();
+
+                    do {
+                        int first = (int) (Math.random() * cards);
+                        int second;
+
+                        do {
+                            second = (int) (Math.random() * cards);
+                        } while (first == second);
+
+                        print_card(first);
+                        print_card(second);
+
+                        guess = readLine("What's the common element? ").trim();
+                        correct_answer = entries[FindCommonElement(first, second)];
+
+                        if (guess.equals(correct_answer)) {
+                            score++;
+                            System.out.println("Correct!");
+                        } else {
+                            System.out.printf("Wrong, the correct answer was %s\n", correct_answer);
+                        }
+
+                    } while (guess.equals(correct_answer));
+
+                    double time = (double) (System.currentTimeMillis() - currentTime) / 1000;
+                    System.out.printf("You got %d correct! Completed in %.2f seconds\n", score, time);
+
+                    break;
+                case "3":
+                    break;
+                case "quit", "q":
+                    continue;
+                default:
+                    System.out.println("Unknown Command");
+                    break;
+            }
+
+            input.nextLine();
+            clear();
+        } while (!command.equalsIgnoreCase("quit") && !command.equalsIgnoreCase("q"));
     }
 
     /**
@@ -248,21 +406,40 @@ public class Main {
 
             // Check command against the available options
             switch (command.toLowerCase()) {
+                case "1":
+                    clear();
+                    System.out.println("Spot it is a skibidi game");
+                    break;
+                case "3":
+                    clear();
+                    start_game();
+                    break;
                 case "4":
                     edit_cards();
                     break;
                 case "debug":
                     debug_console();
                     break;
-                case "quit":
+                case "quit", "q":
                     System.out.println("why u leave :(");
                     break;
                 default:
                     System.out.println("Unknown Command");
                     break;
             }
-            System.out.println();
+
+            input.nextLine();
+            clear();
         } while (!command.equalsIgnoreCase("quit") && !command.equalsIgnoreCase("q")); // Continue if the command isn't "quit"
+    }
+
+    // Print out a card
+
+    public static void print_card(int idx) {
+        for (int index : deck[idx]) {
+            System.out.printf("%s, ", entries[index]);
+        }
+        System.out.println();
     }
 
     // Helper method to print out the deck
@@ -292,6 +469,7 @@ public class Main {
             System.out.println("Shuffle Deck w/o Removal [3]");
             System.out.println("Shuffle Card [4]");
             System.out.println("Print current deck [5]");
+            System.out.println("Find the common element [6]");
             System.out.println("Exit [E]");
 
             command = input.nextLine();
@@ -328,12 +506,22 @@ public class Main {
                 case "print", "5":
                     print_deck();
                     break;
+                case "findcommon", "6":
+                    int first = readInt("first card: ") - 1;
+                    input.nextLine();
+                    int second = readInt("second card: ") - 1;
+                    input.nextLine();
+
+                    System.out.println(entries[FindCommonElement(first, second)]);
+                    break;
                 case "exit", "e":
                     continue;
                 default:
                     System.out.println("Unknown Command");
                     break;
             }
+
+            input.nextLine();
             System.out.println();
         } while (!command.equalsIgnoreCase("exit") && !command.equalsIgnoreCase("e"));
 
