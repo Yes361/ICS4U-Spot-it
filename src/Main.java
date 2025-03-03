@@ -12,32 +12,72 @@ public class Main {
     static Scanner input;
 
     /* Declaration for Console Colors */
+    // Copied from https://www.w3schools.blog/ansi-colors-java
 
-    // text colors
-//    BLACK	\u001B[30m	BLACK_BACKGROUND	\u001B[40m
-//    RED	\u001B[31m	RED_BACKGROUND	\u001B[41m
-//    GREEN	\u001B[32m	GREEN_BACKGROUND	\u001B[42m
-//    YELLOW	\u001B[33m	YELLOW_BACKGROUND	\u001B[43m
-//    BLUE	\u001B[34m	BLUE_BACKGROUND	\u001B[44m
-//    PURPLE	\u001B[35m	PURPLE_BACKGROUND	\u001B[45m
-//    CYAN	\u001B[36m	CYAN_BACKGROUND	\u001B[46m
-//    WHITE	\u001B[37m	WHITE_BACKGROUND	\u001B[47m
-
-    public static final String WHITE = "\u001B[37m";
-    public static final String BRIGHT_YELLOW = "\u001B[33;1m";
-    public static final String BRIGHT_BLUE = "\u001B[34;1m";
-    public static final String RED = "\u001B[1;91m";
-    public static final String CYAN = "\u001B[0;96m";
-    public static final String GREEN = "\u001B[1;92m";
-    public static final String BRIGHT_WHITE = "\u001B[37;1m";
-    public static final String BRIGHT_MAGENTA = "\u001B[1;95m";
-
-    // background colors
-    public static final String BLACK_BACKGROUND = "\u001B[40;1m";
-    public static final String RED_BACKGROUND = "\u001B[41;1m";
-    public static final String YELLOW_BACKGROUND = "\u001B[43m";
-    public static final String WHITE_BACKGROUND = "\u001B[47m";
-    public static final String CYAN_BACKGROUND= "\u001B[46m";
+    public static final String RESET = "\033[0m";  // Text Reset
+    // Regular Colors
+    public static final String BLACK = "\033[0;30m";   // BLACK
+    public static final String RED = "\033[0;31m";     // RED
+    public static final String GREEN = "\033[0;32m";   // GREEN
+    public static final String YELLOW = "\033[0;33m";  // YELLOW
+    public static final String BLUE = "\033[0;34m";    // BLUE
+    public static final String PURPLE = "\033[0;35m";  // PURPLE
+    public static final String CYAN = "\033[0;36m";    // CYAN
+    public static final String WHITE = "\033[0;37m";   // WHITE
+    // Bold
+    public static final String BLACK_BOLD = "\033[1;30m";  // BLACK
+    public static final String RED_BOLD = "\033[1;31m";    // RED
+    public static final String GREEN_BOLD = "\033[1;32m";  // GREEN
+    public static final String YELLOW_BOLD = "\033[1;33m"; // YELLOW
+    public static final String BLUE_BOLD = "\033[1;34m";   // BLUE
+    public static final String PURPLE_BOLD = "\033[1;35m"; // PURPLE
+    public static final String CYAN_BOLD = "\033[1;36m";   // CYAN
+    public static final String WHITE_BOLD = "\033[1;37m";  // WHITE
+    // Underline
+    public static final String BLACK_UNDERLINED = "\033[4;30m";  // BLACK
+    public static final String RED_UNDERLINED = "\033[4;31m";    // RED
+    public static final String GREEN_UNDERLINED = "\033[4;32m";  // GREEN
+    public static final String YELLOW_UNDERLINED = "\033[4;33m"; // YELLOW
+    public static final String BLUE_UNDERLINED = "\033[4;34m";   // BLUE
+    public static final String PURPLE_UNDERLINED = "\033[4;35m"; // PURPLE
+    public static final String CYAN_UNDERLINED = "\033[4;36m";   // CYAN
+    public static final String WHITE_UNDERLINED = "\033[4;37m";  // WHITE
+    // Background
+    public static final String BLACK_BACKGROUND = "\033[40m";  // BLACK
+    public static final String RED_BACKGROUND = "\033[41m";    // RED
+    public static final String GREEN_BACKGROUND = "\033[42m";  // GREEN
+    public static final String YELLOW_BACKGROUND = "\033[43m"; // YELLOW
+    public static final String BLUE_BACKGROUND = "\033[44m";   // BLUE
+    public static final String PURPLE_BACKGROUND = "\033[45m"; // PURPLE
+    public static final String CYAN_BACKGROUND = "\033[46m";   // CYAN
+    public static final String WHITE_BACKGROUND = "\033[47m";  // WHITE
+    // High Intensity
+    public static final String BLACK_BRIGHT = "\033[0;90m";  // BLACK
+    public static final String RED_BRIGHT = "\033[0;91m";    // RED
+    public static final String GREEN_BRIGHT = "\033[0;92m";  // GREEN
+    public static final String YELLOW_BRIGHT = "\033[0;93m"; // YELLOW
+    public static final String BLUE_BRIGHT = "\033[0;94m";   // BLUE
+    public static final String PURPLE_BRIGHT = "\033[0;95m"; // PURPLE
+    public static final String CYAN_BRIGHT = "\033[0;96m";   // CYAN
+    public static final String WHITE_BRIGHT = "\033[0;97m";  // WHITE
+    // Bold High Intensity
+    public static final String BLACK_BOLD_BRIGHT = "\033[1;90m"; // BLACK
+    public static final String RED_BOLD_BRIGHT = "\033[1;91m";   // RED
+    public static final String GREEN_BOLD_BRIGHT = "\033[1;92m"; // GREEN
+    public static final String YELLOW_BOLD_BRIGHT = "\033[1;93m";// YELLOW
+    public static final String BLUE_BOLD_BRIGHT = "\033[1;94m";  // BLUE
+    public static final String PURPLE_BOLD_BRIGHT = "\033[1;95m";// PURPLE
+    public static final String CYAN_BOLD_BRIGHT = "\033[1;96m";  // CYAN
+    public static final String WHITE_BOLD_BRIGHT = "\033[1;97m"; // WHITE
+    // High Intensity backgrounds
+    public static final String BLACK_BACKGROUND_BRIGHT = "\033[0;100m";// BLACK
+    public static final String RED_BACKGROUND_BRIGHT = "\033[0;101m";// RED
+    public static final String GREEN_BACKGROUND_BRIGHT = "\033[0;102m";// GREEN
+    public static final String YELLOW_BACKGROUND_BRIGHT = "\033[0;103m";// YELLOW
+    public static final String BLUE_BACKGROUND_BRIGHT = "\033[0;104m";// BLUE
+    public static final String PURPLE_BACKGROUND_BRIGHT = "\033[0;105m"; // PURPLE
+    public static final String CYAN_BACKGROUND_BRIGHT = "\033[0;106m";  // CYAN
+    public static final String WHITE_BACKGROUND_BRIGHT = "\033[0;107m";   // WHITE
 
     public static void main(String[] args) {
         input = new Scanner(System.in);
@@ -45,8 +85,6 @@ public class Main {
         /* Generate a default deck of cards */
         String[] DefaultItems = {"0", "1", "2", "3", "4", "5", "6"};
         GenerateDeck(3, DefaultItems);
-
-        System.out.println(findNthPrime(10));
 
         /* Loading Screen */
         print_progressbar(20, 1000);
@@ -63,15 +101,14 @@ public class Main {
 
     /**
      * Prints a Progressbar
+     * My take on the progress bar inspried by <a href="https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java">...</a>
      *
      * @param length:   Number of Icons
      * @param interval: Interval between icon loading
-     *
-     * @description My take on the progress bar inspried by https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java
      */
     public static void print_progressbar(int length, long interval) {
-        char incomplete = '░'; // U+2591 Unicode Character
-        char complete = '█'; // U+2588 Unicode Character
+        char incomplete = '.';
+        char complete = '=';
 
         String progressBar = "";
         for (int i = 0; i < length; i++) {
@@ -115,31 +152,48 @@ public class Main {
         return i;
     }
 
-//    public static void print_card(int[] elements) {
-//
-//        int length = elements.length;
-//        double side = Math.sqrt(length);
-//
-//        int row = (int) Math.ceil(side);
-//        int col = (int) Math.round(side);
-//
-//        int[][] grid = new int[row][col];
-//        int maxLength = 0;
-//
-//        for (int i = 0; i < row; i++) {
-//            int sum = 0;
-//            for (int j = 0; j < col; j++) {
-//                int index = i * row + col;
-//
-//                int entryIndex = elements[index];
-//                grid[i][j] = entryIndex;
-//
-//                sum += entries[entryIndex].length();
-//            }
-//
-//            maxLength = Math.max(maxLength, sum);
-//        }
-//    }
+    public static void console_gradient(int interval, int duration) {
+        int[] colors = {30, 31, 32, 33, 34, 35, 36, 37, 90, 91, 92, 93, 94, 95, 96, 97};
+        int iterations = duration / interval;
+
+        for (int i = 0;i < iterations;i++) {
+            for (int color : colors) {
+                System.out.printf("\033[0;%dm%s", color, "\rskibidi");
+
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException error) {
+
+                }
+            }
+        }
+    }
+
+    public static void print_card(int[] elements) {
+
+        int length = elements.length;
+        double side = Math.sqrt(length);
+
+        int row = (int) Math.ceil(side);
+        int col = (int) Math.round(side);
+
+        int[][] grid = new int[row][col];
+        int maxLength = 0;
+
+        for (int i = 0; i < row; i++) {
+            int sum = 0;
+            for (int j = 0; j < col; j++) {
+                int index = i * row + col;
+
+                int entryIndex = elements[index];
+                grid[i][j] = entryIndex;
+
+                sum += entries[entryIndex].length();
+            }
+
+            maxLength = Math.max(maxLength, sum);
+        }
+    }
 
     /* Helper Methods */
 
@@ -231,6 +285,17 @@ public class Main {
 
         int num_of_cards = getNumberOfImages(num_of_images_per_card);
 
+        try {
+            if (items.length < num_of_cards) {
+                throw new RuntimeException("Number of cards is less than required");
+            }
+        } catch (RuntimeException error) {
+            System.out.println(error.getMessage());
+            return;
+        }
+
+        setEntries(items);
+
         /* Custom Spot it Generation Algorithm Implementation */
         // https://www.101computing.net/the-dobble-algorithm/
 
@@ -254,8 +319,6 @@ public class Main {
                 }
             }
         }
-
-        setEntries(items);
     }
 
     public static int FindCommonElement(int firstCard, int secondCard) {
@@ -397,14 +460,14 @@ public class Main {
             String correct_answer = entries[FindCommonElement(first_choice, second_choice)];
 
             if (guess.equals(correct_answer)) {
-                System.out.println(GREEN + "Correct! +1" + WHITE);
+                System.out.println(GREEN + "Correct! +1" + RESET);
                 score++;
             } else {
-                System.out.printf(RED + "Not correct :( The correct answer was %s\n" + WHITE, correct_answer);
+                System.out.printf(RED + "Not correct :( The correct answer was %s\n" + RESET, correct_answer);
             }
         }
 
-        System.out.printf(GREEN + "%d / %d Correct\n" + WHITE, score, rounds);
+        System.out.printf(GREEN + "%d / %d Correct\n" + RESET, score, rounds);
     }
 
     public static void endless_mode() {
@@ -447,9 +510,9 @@ public class Main {
             Thread.sleep(1000);
             System.out.print("2... ");
             Thread.sleep(1000);
-            System.out.print("1... ");
+            System.out.println("1... ");
             Thread.sleep(1000);
-            System.out.print("Go!");
+            System.out.println("Go!");
         } catch (InterruptedException ignored) {
             System.out.println("Something Unexpected happened!");
             return;
@@ -479,7 +542,7 @@ public class Main {
 
             if (guess.equals(correct_answer)) {
                 score++;
-                System.out.println("Correct!");
+                System.out.println(GREEN + "Correct!" + RESET);
             } else {
                 System.out.printf("Wrong, the correct answer was %s\n", correct_answer);
             }
@@ -491,10 +554,10 @@ public class Main {
         String command;
 
         do {
-            System.out.println("Game Modes");
-            System.out.println("Normal Mode [1]");
-            System.out.println("Endless Mode [2]");
-            System.out.println("Timed Variant [3]");
+            System.out.println(WHITE_UNDERLINED + WHITE_BOLD_BRIGHT + "Game Modes" + RESET);
+            System.out.println(RED_BACKGROUND + WHITE_BOLD_BRIGHT + "Normal Mode [1]" + RESET);
+            System.out.println(BLUE_BACKGROUND + WHITE_BOLD_BRIGHT + "Endless Mode [2]" + RESET);
+            System.out.println(YELLOW_BACKGROUND + WHITE_BOLD_BRIGHT + "Timed Variant [3]" + RESET);
             System.out.println("Quit to previous [Q]");
             System.out.println();
 
@@ -563,7 +626,6 @@ public class Main {
                     break;
             }
 
-            input.nextLine();
             clear();
         } while (!command.equalsIgnoreCase("quit") && !command.equalsIgnoreCase("q")); // Continue if the command isn't "quit"
     }
