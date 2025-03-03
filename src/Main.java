@@ -2,11 +2,15 @@ import java.util.*;
 
 public class Main {
     /* Declarations for variables related to the Deck */
+
+    // the Deck is a static 2d array of ints, each int symbolizes a symbol which is stored in entries
     static int[][] deck;
     static String[] entries;
 
     /* Declarations for variables related to Score */
-    int highscore = -1;
+    int normalModeHighscore = -1;
+    int endlessModeHighscore = -1;
+    int timedVariantHighscore = -1;
 
     /* Declaration of Objects */
     static Scanner input;
@@ -89,19 +93,33 @@ public class Main {
         /* Loading Screen */
         print_progressbar(20, 1000);
         clear();
-        init_main_menu();
+        System.out.println(
+            """
+              _________              __    .__  __ \s
+             /   _____/_____   _____/  |_  |__|/  |_\s
+             \\_____  \\\\____ \\ /  _ \\   __\\ |  \\   __\\
+             /        \\  |_> >  <_> )  |   |  ||  | \s
+            /_______  /   __/ \\____/|__|   |__||__| \s
+                    \\/|__|                          \s
+            __________________________________________
+           \s"""
+        );
 
         /* Main Menu Options */
         main_menu();
     }
 
+    // Setter function for entries
     public static void setEntries(String[] items) {
         entries = items;
     }
 
+    /* Miscellaneous Helper Methods */
+
     /**
      * Prints a Progressbar
-     * My take on the progress bar inspried by <a href="https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java">...</a>
+     * My take on the progress bar inspired by <a href="https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java">...</a>
+     * Inspired by Qazi
      *
      * @param length:   Number of Icons
      * @param interval: Interval between icon loading
@@ -110,16 +128,20 @@ public class Main {
         char incomplete = '.';
         char complete = '=';
 
+        // Create a string of incomplete chars
         String progressBar = "";
         for (int i = 0; i < length; i++) {
+            // Stringbuilder would be better here but I can't be bothered to read documentation
             progressBar += String.valueOf(incomplete);
         }
 
+        // Iteratively update it to fill with complete chars every interval
         for (int i = 0; i < length; i++) {
-            progressBar = progressBar.substring(0, i) + String.valueOf(complete) + progressBar.substring(i + 1);
+            progressBar = progressBar.substring(0, i) + String.valueOf(complete) + ">" + progressBar.substring(i + 2);
             System.out.print("\r" + progressBar);
+
             try {
-                Thread.sleep(interval);
+                Thread.sleep(interval); // pause the thread
             } catch (InterruptedException error) {
 
             }
@@ -127,38 +149,61 @@ public class Main {
         System.out.println(progressBar);
     }
 
+    /**
+     * Helper method to determine whether a given value is prime
+     *
+     * @param n Given value
+     *
+     * @return Boolean value indicating whether n is prime
+     */
     public static boolean isPrime(int n) {
+        // iterate from 2...n - 1, checking if n is divisible by it
         for (int i = 2;i < n;i++) {
+            // return false if n is divisible by i (a number that is not 1 or n itself)
             if (n % i == 0) {
                 return false;
             }
         }
+
+        // return true if we don't find a divisor
         return true;
     }
 
+    /**
+     * Helper method to determine the nth prime
+     *
+     * @param n Nth prime
+     *
+     * @return Returns the nth prime
+     */
     public static int findNthPrime(int n) {
+        // Throw an exception if n is non-positive
         if (n <= 0) {
-            return -1;
+            throw new IllegalArgumentException("Can not find the nth prime when n is <= 0");
         }
 
+        // declarations
         int primesFound = 0;
-        int i = 1;
+        int current_num = 1;
+
+        // increment current_num until we've found n primes
         while (primesFound < n) {
-            if (isPrime(++i)) {
-                primesFound++;
+            if (isPrime(++current_num)) {
+                primesFound++; // increment primesFound when we, guess, find a prime!
             }
         }
 
-        return i;
+        return current_num;
     }
 
-    public static void console_gradient(int interval, int duration) {
+    // I wanted to create a console gradient effect
+    public static void console_gradient(String message, int interval, int duration) {
         int[] colors = {30, 31, 32, 33, 34, 35, 36, 37, 90, 91, 92, 93, 94, 95, 96, 97};
         int iterations = duration / interval;
 
         for (int i = 0;i < iterations;i++) {
             for (int color : colors) {
-                System.out.printf("\033[0;%dm%s", color, "\rskibidi");
+                System.out.printf("\033[0;%dm\r%s", color, message);
 
                 try {
                     Thread.sleep(interval);
@@ -169,6 +214,7 @@ public class Main {
         }
     }
 
+    // AHNAF THIS IS UR SECTION
     public static void print_card(int[] elements) {
 
         int length = elements.length;
@@ -195,8 +241,6 @@ public class Main {
         }
     }
 
-    /* Helper Methods */
-
     /**
      * Clear Screen
      */
@@ -206,7 +250,9 @@ public class Main {
     }
 
     /**
-     * readInt prompts the user for an int
+     * Prompts the user for an int
+     *
+     *
      */
     public static int readInt(String prompt) {
         System.out.print(prompt);
@@ -214,66 +260,90 @@ public class Main {
     }
 
     /**
-     * readInt prompts the user for a String
+     * Prompts the user for a String
      */
     public static String readLine(String prompt) {
         System.out.print(prompt);
         return input.nextLine();
     }
 
+    /* Spot it Helper Methods */
+
     /**
      * Get the total number of images based on the amount of images per card
+     *
+     * @param images_per_card Symbols per card
+     *
+     * @return Number of cards and total number of symbols required
      */
-    public static int getNumberOfImages(int num_of_images_per_card) {
-        return (int) Math.pow(num_of_images_per_card, 2) - num_of_images_per_card + 1;
+    public static int getNumberOfImages(int images_per_card) {
+        return (int) Math.pow(images_per_card, 2) - images_per_card + 1;
     }
 
-    // dw abt this stuff yet this is poorly written code i wrote on a whim
+    /**
+     * Picks two random unique indices
+     *
+     * @param length The length of the array to choose indices from
+     *
+     * @return An array of ints [0] - first choice and [1] - second choice
+     */
     public static int[] pickTwoIndices(int length) {
+        // Determine the first choice
         int first_choice = (int) (Math.random() * length);
         int second_choice;
 
+        // Determine the second choice but only if it doesn't match the first choice
         do {
             second_choice = (int) (Math.random() * length);
         } while (first_choice == second_choice);
 
+        // Return an array of the choices
         return new int[]{ first_choice, second_choice };
     }
 
-    // ignore this to
+    /**
+     * A method to shuffle the complete deck
+     *
+     * @param iterations Number of iterations to swap indices
+     */
     public static void ShuffleDeck(int iterations) {
-        int deckLength = deck.length;
-
         for (int i = 0; i < iterations; i++) {
-            int[] choiceIndex = pickTwoIndices(deckLength);
+            // Retrive two random indices
+            int[] choiceIndex = pickTwoIndices(deck.length);
             int first_choice = choiceIndex[0];
             int second_choice = choiceIndex[1];
 
+            // Swapping card positions in the deck
             int[] temp = deck[first_choice];
             deck[first_choice] = deck[second_choice];
             deck[second_choice] = temp;
         }
     }
 
-    public static void ShuffleCard(int idx, int iterations) {
-        int[] card = deck[idx];
-        int deckLength = card.length;
+    public static void ShuffleCard(int card_id, int iterations) {
+        int[] card = deck[card_id];
 
         for (int i = 0; i < iterations; i++) {
-            int[] choiceIndex = pickTwoIndices(deckLength);
+            // Get the wchoices
+            int[] choiceIndex = pickTwoIndices(card.length);
             int first_choice = choiceIndex[0];
             int second_choice = choiceIndex[1];
 
+            // Swapping symbols in the card
             int temp = card[first_choice];
             card[first_choice] = card[second_choice];
             card[second_choice] = temp;
         }
     }
 
+    /**
+     * Shuffles the whole deck including each card
+     */
     public static void ShuffleWholeDeck() {
-        ShuffleDeck(20);
+        int ArbitrayIterations = 20;
+        ShuffleDeck(ArbitrayIterations);
         for (int i = 0;i < deck.length;i++) {
-            ShuffleCard(i, 20);
+            ShuffleCard(i, ArbitrayIterations);
         }
     }
 
@@ -281,26 +351,31 @@ public class Main {
      * Generates the deck given the images per card and a list of images
      * For now it will only produce a deck of cards with 3 images per card
      */
-    public static void GenerateDeck(int num_of_images_per_card, String[] items) {
+    public static void GenerateDeck(int images_per_card, String[] items) {
 
-        int num_of_cards = getNumberOfImages(num_of_images_per_card);
+        // Check if the number of images is 1 more than a prime number
+        if (!isPrime(images_per_card - 1)) {
+            throw new RuntimeException("Number of symbols is not 1 more than a prime number");
+        }
 
-        try {
-            if (items.length < num_of_cards) {
-                throw new RuntimeException("Number of cards is less than required");
-            }
-        } catch (RuntimeException error) {
-            System.out.println(error.getMessage());
-            return;
+        int num_of_cards = getNumberOfImages(images_per_card);
+
+        // Check if the number of given images is less than required
+        if (items.length < num_of_cards) {
+            throw new RuntimeException("Number of cards is less than required");
         }
 
         setEntries(items);
 
         /* Custom Spot it Generation Algorithm Implementation */
-        // https://www.101computing.net/the-dobble-algorithm/
+        // Inspired by https://www.101computing.net/the-dobble-algorithm/
+        /* Algorithm Explanation
+            TODO: fill in this
+        */
 
-        deck = new int[num_of_cards][num_of_images_per_card];
-        int primeN = num_of_images_per_card - 1;
+        // Initialize new deck size
+        deck = new int[num_of_cards][images_per_card];
+        int primeN = images_per_card - 1;
 
         for (int i = 0;i < primeN + 1;i++) {
             deck[i][0] = 0;
@@ -321,7 +396,23 @@ public class Main {
         }
     }
 
+    /**
+     * Finds the common element between two cards
+     *
+     * @param firstCard Index of the first card in the deck
+     * @param secondCard Index of the second card in the deck
+     */
     public static int FindCommonElement(int firstCard, int secondCard) {
+        /*
+            Algorithm Description
+            Initialize an array of booleans with a length of the number of symbols in the deck
+
+            We iterate through each index of each card and since the deck/card
+            contains an index from 0...(# of Symbols - 1) we can set the corresponding index in the array of booleans
+            to true, when we have to set a value that is already true, that means we've already encountered this symbol.
+            This algorithm will always return the first instance of a common match and given that there's only ever one match between
+            cards in spot it, what could possibly go wrong!
+        */
         boolean[] images = new boolean[deck.length];
         int images_per_card = deck[firstCard].length;
 
@@ -329,10 +420,11 @@ public class Main {
             int firstImage = deck[firstCard][i];
             int secondImage = deck[secondCard][i];
 
+            // Check if we've encountered this symbol before
             if (images[firstImage]) {
                 return firstImage;
             }
-            images[firstImage] = true;
+            images[firstImage] = true; // set this index to true indicating that we have encountered it
 
             if (images[secondImage]) {
                 return secondImage;
@@ -340,12 +432,23 @@ public class Main {
             images[secondImage] = true;
         }
 
+        // statement for resolving control flow warnings
         return -1;
     }
 
+    /**
+     * Prompt user for an int and perform basic input validation checks which include
+     * input mismatch and whether the value is non-positive or non-negative
+     *
+     * @param prompt Prompt to provide the user
+     * @param checkPositive If true will prompt the user for only positive values
+     *
+     */
     public static int readIntWithInputValidation(String prompt, boolean checkPositive) {
         int num;
+
         do {
+            // try/catch statement to catch InputMismatchExceptions from the scanner
             try {
                 num = readInt(prompt);
                 input.nextLine();
@@ -359,97 +462,24 @@ public class Main {
             } catch (InputMismatchException error) {
                 System.out.println("Please input a positive integer");
             }
-        } while (true);
+        } while (true); // I know this is bad practice...
 
         return num;
     }
 
+    /* Game Mode Methods */
+    // TODO: Add more game modes
+    // TODO: Add difficulty settings
+    // TODO: Add score calculations
+
     /**
-     * Loading screen
-     * TODO: We can add cool effects to make the laoding screen cool
+     *  Normal Mode
      */
-    public static void init_main_menu() {
-        System.out.println(
-                """
-                          _________              __    .__  __  \s
-                         /   _____/_____   _____/  |_  |__|/  |_\s
-                         \\_____  \\\\____ \\ /  _ \\   __\\ |  \\   __\\
-                         /        \\  |_> >  <_> )  |   |  ||  | \s
-                        /_______  /   __/ \\____/|__|   |__||__| \s
-                                \\/|__|                          \s
-                        __________________________________________
-                        """
-        );
-    }
-
-    // lmao
-    // IGNORE THIS DEFINETLY IGNORE THIS
-    public static void edit_cards() {
-        String command;
-
-        do {
-            int current_images_per_card = deck[0].length;
-
-            System.out.println("Enter new Cards [1]");
-            System.out.println("Modify Entry [2]");
-            System.out.println("Exit [E]");
-
-            command = input.nextLine();
-
-            clear();
-
-            switch (command.toLowerCase()) {
-                case "1":
-                    System.out.printf("Current number of images per Card is %d\n", current_images_per_card);
-
-                    int new_images_per_card = readIntWithInputValidation("Enter the number of images per card! ", true);
-
-                    int num_of_cards = getNumberOfImages(new_images_per_card);
-
-                    System.out.printf("Input %d Cards\n", num_of_cards);
-
-                    String[] items = new String[num_of_cards];
-                    for (int i = 0; i < num_of_cards; i++) {
-                        do {
-                            System.out.printf("No. %d: ", i + 1);
-                            items[i] = input.nextLine();
-                        } while (items[i].isEmpty());
-                    }
-
-                    String response = readLine("Save Selection? [y/n]\n");
-                    if (response.equalsIgnoreCase("y")) {
-                        GenerateDeck(new_images_per_card, items);
-                    }
-
-                    break;
-                case "2":
-                    System.out.println("Current Image Selection:");
-                    for (int i = 0; i < entries.length; i++) {
-                        System.out.printf("No. %d: %s\n", i + 1, entries[i]);
-                    }
-
-                    int index = readIntWithInputValidation("Enter the index of the entry you wish to ", true);
-                    String newImage = readLine("What is the new Image? ");
-                    entries[index - 1] = newImage;
-
-                    break;
-                case "e":
-                    continue;
-                default:
-                    System.out.println("Unknown command");
-                    break;
-            }
-
-        } while (!command.equalsIgnoreCase("exit") && !command.equalsIgnoreCase("e"));
-    }
-
-    public static void normal_mode() {
-        int rounds = readIntWithInputValidation(CYAN_BACKGROUND + "How many rounds do you wish to play? ", true);
-        int cardLength = deck.length;
+    public static void normal_mode(int rounds) {
         int score = 0;
 
         for (int i = 0; i < rounds; i++) {
-            int[] choiceIndex = pickTwoIndices(cardLength);
+            int[] choiceIndex = pickTwoIndices(deck.length);
             int first_choice = choiceIndex[0];
             int second_choice = choiceIndex[1];
 
@@ -547,13 +577,24 @@ public class Main {
                 System.out.printf("Wrong, the correct answer was %s\n", correct_answer);
             }
         } while (true);
+
+        System.out.printf("You ran out of time! You got a score of %d\n", score);
     }
 
-    // This is how the user is going to be able to run the spot-it game
+    /* Menu Methods */
+
+    public static void view_score() {
+
+    }
+
+    /**
+     * Menu Method for Game Modes
+     */
     public static void start_game() {
         String command;
 
         do {
+            // Print Menu Options
             System.out.println(WHITE_UNDERLINED + WHITE_BOLD_BRIGHT + "Game Modes" + RESET);
             System.out.println(RED_BACKGROUND + WHITE_BOLD_BRIGHT + "Normal Mode [1]" + RESET);
             System.out.println(BLUE_BACKGROUND + WHITE_BOLD_BRIGHT + "Endless Mode [2]" + RESET);
@@ -561,12 +602,12 @@ public class Main {
             System.out.println("Quit to previous [Q]");
             System.out.println();
 
+            // Recieve input
             command = input.nextLine();
-
-            // TODO: add arguments for difficulty
             switch (command.toLowerCase()) {
                 case "1":
-                    normal_mode();
+                    int rounds = readIntWithInputValidation(CYAN_BACKGROUND + "How many rounds do you wish to play? ", true);
+                    normal_mode(rounds);
                     break;
                 case "2":
                     endless_mode();
@@ -574,14 +615,21 @@ public class Main {
                 case "3":
                     timed_variant(20);
                     break;
+
+                // Continue if the command is an exit
                 case "quit", "q":
                     continue;
+
+                // Handle default case
                 default:
                     System.out.println("Unknown Command");
                     break;
             }
 
+            // Clear console after every match
             clear();
+
+        // End when the command matches "quit"
         } while (!command.equalsIgnoreCase("quit") && !command.equalsIgnoreCase("q"));
     }
 
@@ -598,7 +646,6 @@ public class Main {
             System.out.println("Rules [1]");
             System.out.println("Scores [2]");
             System.out.println("New Game [3]");
-            System.out.println("Edit Cards [4]");
             System.out.println("Quit [Q]");
             System.out.println();
 
@@ -611,12 +658,12 @@ public class Main {
                     clear();
                     System.out.println("Spot it is a skibidi game");
                     break;
+                case "2":
+
+                    break;
                 case "3":
                     clear();
                     start_game();
-                    break;
-                case "4":
-                    edit_cards();
                     break;
                 case "quit", "q":
                     System.out.println("why u leave :(");
@@ -631,22 +678,10 @@ public class Main {
     }
 
     // Print out a card
-
     public static void print_card(int idx) {
         for (int index : deck[idx]) {
             System.out.printf("%s, ", entries[index]);
         }
         System.out.println();
-    }
-
-    // Helper method to print out the deck
-    public static void print_deck() {
-        // btw this is
-        for (int[] indices : deck) {
-            for (int index : indices) {
-                System.out.printf("%s, ", entries[index]);
-            }
-            System.out.println();
-        }
     }
 }
