@@ -8,12 +8,23 @@ public class Main {
     static String[] entries;
 
     /* Declarations for variables related to Score */
-    int normalModeHighscore = -1;
-    int endlessModeHighscore = -1;
-    int timedVariantHighscore = -1;
+    // Default initialized to -1 to represent that a score wasn't obtained
+    static double normalModeHighscore = -1;
+    static double endlessModeHighscore = -1;
+
+    static double timedVariantHighscore = -1;
+    static double fastestCompleted = -1;
 
     /* Declaration of Objects */
     static Scanner input;
+
+    static String[] difficulty_modes = {
+        "Super Hard",
+        "Hard",
+        "Intermediate",
+        "Easy",
+        "Custom",
+    };
 
     /* Declaration for Console Colors */
     // Copied from https://www.w3schools.blog/ansi-colors-java
@@ -87,30 +98,29 @@ public class Main {
         input = new Scanner(System.in);
 
         /* Generate a default deck of cards */
-        String[] DefaultItems = {"0", "1", "2", "3", "4", "5", "6"};
-        GenerateDeck(3, DefaultItems);
+        int images_per_card = 8;
+        entries = GenerateDefaultImageList(images_per_card);
+        GenerateDeck(images_per_card);
 
         /* Loading Screen */
-        print_progressbar(20, 1000);
+//        print_progressbar(20, 1000);
         clear();
-        System.out.println(
-            """
-              _________              __    .__  __ \s
-             /   _____/_____   _____/  |_  |__|/  |_\s
-             \\_____  \\\\____ \\ /  _ \\   __\\ |  \\   __\\
-             /        \\  |_> >  <_> )  |   |  ||  | \s
-            /_______  /   __/ \\____/|__|   |__||__| \s
-                    \\/|__|                          \s
-            __________________________________________
-           \s"""
-        );
 
         /* Main Menu Options */
         main_menu();
     }
 
     // Setter function for entries
-    public static void setEntries(String[] items) {
+    public static void setEntries(int images_per_card, String[] items) {
+        if (!isPrime(images_per_card - 1)) {
+            throw new RuntimeException("Number of symbols is not 1 more than a prime number");
+        }
+
+        int num_of_cards = getNumberOfImages(images_per_card);
+        if (items.length < num_of_cards) {
+            throw new RuntimeException("Number of cards is less than required");
+        }
+
         entries = items;
     }
 
@@ -137,7 +147,7 @@ public class Main {
 
         // Iteratively update it to fill with complete chars every interval
         for (int i = 0; i < length; i++) {
-            progressBar = progressBar.substring(0, i) + String.valueOf(complete) + ">" + progressBar.substring(i + 2);
+            progressBar = progressBar.substring(0, i) + String.valueOf(complete) + progressBar.substring(i + 1);
             System.out.print("\r" + progressBar);
 
             try {
@@ -147,6 +157,23 @@ public class Main {
             }
         }
         System.out.println(progressBar);
+    }
+
+    public static void print_seperator() {
+        int dashes = 20;
+        for (int i = 0;i < dashes;i++) {
+            System.out.print("-");
+        }
+        System.out.println();
+    }
+
+    public static boolean containsString(String match, String[] items) {
+        for (String item : items) {
+            if (item.equals(match)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -247,6 +274,17 @@ public class Main {
     public static void clear() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+        System.out.println(
+                """
+                  _________              __    .__  __ \s
+                 /   _____/_____   _____/  |_  |__|/  |_\s
+                 \\_____  \\\\____ \\ /  _ \\   __\\ |  \\   __\\
+                 /        \\  |_> >  <_> )  |   |  ||  | \s
+                /_______  /   __/ \\____/|__|   |__||__| \s
+                        \\/|__|                          \s
+                __________________________________________
+               \s"""
+        );
     }
 
     /**
@@ -265,6 +303,20 @@ public class Main {
     public static String readLine(String prompt) {
         System.out.print(prompt);
         return input.nextLine();
+    }
+
+
+    public static String readNonEmptyLine(String prompt, String error_message) {
+        String result;
+        do {
+            result = readLine(prompt);
+
+            if (result.isEmpty() && !error_message.isEmpty()) {
+//                System.out.print(error_message);
+            }
+        } while (result.isEmpty());
+
+        return result;
     }
 
     /* Spot it Helper Methods */
@@ -348,10 +400,29 @@ public class Main {
     }
 
     /**
-     * Generates the deck given the images per card and a list of images
-     * For now it will only produce a deck of cards with 3 images per card
+     * Generates a list of images that are just numbers
+     *
+     * @param images_per_card Symbols per card
+     *
+     * @return An array of string representation of numbers
      */
-    public static void GenerateDeck(int images_per_card, String[] items) {
+    public static String[] GenerateDefaultImageList(int images_per_card) {
+        int num_of_images = getNumberOfImages(images_per_card);
+        String[] images = new String[num_of_images];
+
+        for (int i = 0;i < num_of_images;i++) {
+            images[i] = String.valueOf(i);
+        }
+
+        return images;
+    }
+
+    /**
+     * Generates the deck given the images per card
+     *
+     * @param images_per_card Symbols per card
+     */
+    public static void GenerateDeck(int images_per_card) {
 
         // Check if the number of images is 1 more than a prime number
         if (!isPrime(images_per_card - 1)) {
@@ -359,13 +430,6 @@ public class Main {
         }
 
         int num_of_cards = getNumberOfImages(images_per_card);
-
-        // Check if the number of given images is less than required
-        if (items.length < num_of_cards) {
-            throw new RuntimeException("Number of cards is less than required");
-        }
-
-        setEntries(items);
 
         /* Custom Spot it Generation Algorithm Implementation */
         // Inspired by https://www.101computing.net/the-dobble-algorithm/
@@ -475,8 +539,11 @@ public class Main {
     /**
      *  Normal Mode
      */
-    public static void normal_mode(int rounds) {
+    public static void normal_mode(String difficulty) {
+        int rounds = readIntWithInputValidation(WHITE_BOLD_BRIGHT + "How many rounds do you wish to play? " + RESET, true);
         int score = 0;
+
+        long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < rounds; i++) {
             int[] choiceIndex = pickTwoIndices(deck.length);
@@ -486,21 +553,52 @@ public class Main {
             print_card(first_choice);
             print_card(second_choice);
 
-            String guess = readLine(CYAN_BACKGROUND + "What's the common element? " + BLACK_BACKGROUND).trim();
+            String guess = readLine(WHITE_BOLD_BRIGHT + "What's the common element? " + RESET).trim();
             String correct_answer = entries[FindCommonElement(first_choice, second_choice)];
 
             if (guess.equals(correct_answer)) {
-                System.out.println(GREEN + "Correct! +1" + RESET);
+                System.out.println(GREEN_BOLD_BRIGHT + "Correct! +1" + RESET);
                 score++;
             } else {
-                System.out.printf(RED + "Not correct :( The correct answer was %s\n" + RESET, correct_answer);
+                System.out.printf(RED_BOLD_BRIGHT + "Not correct :( The correct answer was %s\n" + RESET, correct_answer);
             }
+
+            long currentTime = System.currentTimeMillis();
+            double timeElapsed = (double) (currentTime - startTime) / 1000;
+
+            System.out.printf("Completed in %.2fs\n", timeElapsed);
         }
 
-        System.out.printf(GREEN + "%d / %d Correct\n" + RESET, score, rounds);
+        print_seperator();
+        System.out.printf(GREEN_BOLD_BRIGHT + "%d / %d Correct\n" + RESET, score, rounds);
+
+        double percentage = (double) score / rounds;
+
+        // Time calculations
+        double totalTime = (double) (System.currentTimeMillis() - startTime) / 1000;
+        double averageTime = totalTime / rounds;
+        // TODO: Better time bonus calculation
+        double timeBonus = (double) rounds / 10;
+
+        // Printing out statistics
+        System.out.println(RED_BOLD_BRIGHT);
+        System.out.printf("%.2f%% Percentage Correct\n", percentage * 100);
+        System.out.printf("Total time %.2fs\n", totalTime);
+        System.out.printf("Average time %.2fs\n", averageTime);
+        System.out.printf("Time Bonus: %.2f\n", timeBonus);
+        System.out.println();
+
+        double score_calculation = percentage * 10 + timeBonus;
+        if (normalModeHighscore < 0 || normalModeHighscore < score_calculation) {
+            System.out.println("New Highscore !");
+            normalModeHighscore = score_calculation;
+        }
+        System.out.printf("Score: %.2f", score_calculation);
+        // System.out.printf("Rank");
+        System.out.println(RESET);
     }
 
-    public static void endless_mode() {
+    public static void endless_mode(String difficulty) {
         int score = 0;
         int cardLength = deck.length;
         String guess, correct_answer;
@@ -530,25 +628,29 @@ public class Main {
         System.out.printf("You got %d correct! Completed in %.2f seconds\n", score, time);
     }
 
-    public static void timed_variant(long seconds) {
+    public static void timed_variant(String difficulty) {
+        double total_time = 20;
         int score = 0;
         int cardLength = deck.length;
         String guess, correct_answer;
 
+        System.out.print(WHITE_BOLD_BRIGHT);
         try {
             System.out.print("3... ");
             Thread.sleep(1000);
             System.out.print("2... ");
             Thread.sleep(1000);
-            System.out.println("1... ");
+            System.out.print("1... ");
             Thread.sleep(1000);
-            System.out.println("Go!");
+            System.out.println("\nGo!");
         } catch (InterruptedException ignored) {
             System.out.println("Something Unexpected happened!");
             return;
         }
+        System.out.print(RESET);
 
-        long previousTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
+        long previousTime = startTime;
         double timeElapsed;
 
         do {
@@ -562,17 +664,20 @@ public class Main {
             guess = readLine("What's the common element? ").trim();
             correct_answer = entries[FindCommonElement(first_choice, second_choice)];
 
-            timeElapsed = (double) (System.currentTimeMillis() - previousTime) / 1000;
+            long currentTime = System.currentTimeMillis();
+            timeElapsed = (double) (currentTime - startTime) / 1000;
 
-            if (timeElapsed > seconds) {
+            if (timeElapsed > total_time) {
                 break;
             }
 
-            System.out.printf("Completed in %.2f. %.2f seconds remaining\n", timeElapsed, seconds - timeElapsed);
+            double timeSinceLastQuestion = (double) (currentTime - previousTime) / 1000;
+            System.out.printf("Completed in %.2fs. %.2f total time remaining\n", timeSinceLastQuestion, total_time - timeElapsed);
+            previousTime = currentTime;
 
             if (guess.equals(correct_answer)) {
                 score++;
-                System.out.println(GREEN + "Correct!" + RESET);
+                System.out.println(GREEN_BOLD_BRIGHT + "Correct!" + RESET);
             } else {
                 System.out.printf("Wrong, the correct answer was %s\n", correct_answer);
             }
@@ -584,7 +689,52 @@ public class Main {
     /* Menu Methods */
 
     public static void view_score() {
+        System.out.println(WHITE_UNDERLINED + "Normal Mode" + RESET);
+        if (normalModeHighscore < 0) {
+            System.out.println("You don't have a highscore for normal mode yet!");
+        } else {
+            System.out.printf("Highscore: %.2f\n", normalModeHighscore);
+        }
+        System.out.println();
 
+        System.out.println(WHITE_UNDERLINED + "Endless Mode" + RESET);
+        if (endlessModeHighscore < 0) {
+            System.out.println("You don't have a highscore for endless mode yet!");
+        } else {
+            System.out.printf("Highscore %.2f\n", endlessModeHighscore);
+        }
+        System.out.println();
+
+        System.out.println(WHITE_UNDERLINED + "Time Out Mode" + RESET);
+        if (timedVariantHighscore < 0) {
+            System.out.println("You don't have a highscore for variant mode yet!");
+        } else {
+            System.out.printf("Highscore %.2f\n", timedVariantHighscore);
+        }
+        System.out.println();
+    }
+
+    public static String handleDifficultySelection() {
+        int chosen_option;
+        int total_modes = difficulty_modes.length;
+
+        do {
+            System.out.println("Difficulty");
+            for (int i = 0;i < total_modes;i++) {
+                System.out.printf("%d) %s ", i + 1, difficulty_modes[i]);
+            }
+            System.out.println();
+
+            chosen_option = readIntWithInputValidation("Select a difficulty", true);
+
+            if (chosen_option < total_modes) {
+                break;
+            } else {
+                System.out.println("Please Select one of the options");
+            }
+        } while (true);
+
+        return difficulty_modes[chosen_option];
     }
 
     /**
@@ -595,30 +745,37 @@ public class Main {
 
         do {
             // Print Menu Options
+
             System.out.println(WHITE_UNDERLINED + WHITE_BOLD_BRIGHT + "Game Modes" + RESET);
-            System.out.println(RED_BACKGROUND + WHITE_BOLD_BRIGHT + "Normal Mode [1]" + RESET);
-            System.out.println(BLUE_BACKGROUND + WHITE_BOLD_BRIGHT + "Endless Mode [2]" + RESET);
-            System.out.println(YELLOW_BACKGROUND + WHITE_BOLD_BRIGHT + "Timed Variant [3]" + RESET);
-            System.out.println("Quit to previous [Q]");
+            System.out.println(RED_BACKGROUND + "Normal Mode [1]" + RESET);
+            System.out.println(BLUE_BACKGROUND + "Endless Mode [2]" + RESET);
+            System.out.println(YELLOW_BACKGROUND + "Timed Variant [3]" + RESET);
+            System.out.println(WHITE_BOLD_BRIGHT + "Quit to previous [Q]");
             System.out.println();
 
             // Recieve input
-            command = input.nextLine();
+            command = readLine("Enter the Command: ");
+
+            if (command.equalsIgnoreCase("quit") || command.equalsIgnoreCase("q")) {
+                break;
+            }
+
+//            String difficulty = handleDifficultySelection();
+            String difficulty = "easy";
+
             switch (command.toLowerCase()) {
                 case "1":
-                    int rounds = readIntWithInputValidation(CYAN_BACKGROUND + "How many rounds do you wish to play? ", true);
-                    normal_mode(rounds);
+                    normal_mode(difficulty);
+                    readLine("(Press enter to continue) ");
                     break;
                 case "2":
-                    endless_mode();
+                    endless_mode(difficulty);
+                    readLine("(Press enter to continue) ");
                     break;
                 case "3":
-                    timed_variant(20);
+                    timed_variant(difficulty);
+                    readLine("(Press enter to continue) ");
                     break;
-
-                // Continue if the command is an exit
-                case "quit", "q":
-                    continue;
 
                 // Handle default case
                 default:
@@ -630,7 +787,7 @@ public class Main {
             clear();
 
         // End when the command matches "quit"
-        } while (!command.equalsIgnoreCase("quit") && !command.equalsIgnoreCase("q"));
+        } while (true);
     }
 
     /**
@@ -642,31 +799,40 @@ public class Main {
         do {
 
             // Main menu Options
-            System.out.println("Menu Options");
-            System.out.println("Rules [1]");
-            System.out.println("Scores [2]");
-            System.out.println("New Game [3]");
-            System.out.println("Quit [Q]");
+            System.out.println(WHITE_UNDERLINED + "Menu Options" + RESET);
+            System.out.println(GREEN_BACKGROUND + "New Game [1]" + RESET);
+            System.out.println(BLUE_BACKGROUND + "Scores [2]" + RESET);
+            System.out.println(RED_BACKGROUND + "Rules [3]" + RESET);
+            System.out.println(PURPLE_BACKGROUND + "Quit [Q]" + RESET);
             System.out.println();
 
             // Read in the command
-            command = input.nextLine();
+            command = readNonEmptyLine("Enter the Command: ", "");
+
+            if (command.equalsIgnoreCase("quit") || command.equalsIgnoreCase("q")) {
+                System.out.println("Why you leave :(");
+                break;
+            }
 
             // Check command against the available options
             switch (command.toLowerCase()) {
                 case "1":
                     clear();
-                    System.out.println("Spot it is a skibidi game");
+                    start_game();
                     break;
                 case "2":
-
+                    clear();
+                    view_score();
+                    readLine("(Press enter to continue) ");
                     break;
                 case "3":
                     clear();
-                    start_game();
-                    break;
-                case "quit", "q":
-                    System.out.println("why u leave :(");
+                    System.out.println(
+                        """
+                        Spot it is a very skibidi game
+                        """
+                    );
+                    readLine("(Press enter to continue) ");
                     break;
                 default:
                     System.out.println("Unknown Command");
@@ -674,7 +840,7 @@ public class Main {
             }
 
             clear();
-        } while (!command.equalsIgnoreCase("quit") && !command.equalsIgnoreCase("q")); // Continue if the command isn't "quit"
+        } while (true);
     }
 
     // Print out a card
