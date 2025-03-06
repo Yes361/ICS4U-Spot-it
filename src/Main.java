@@ -100,65 +100,37 @@ public class Main {
 
         /* Generate a default deck of cards */
         int images_per_card = 3;
-        entries = GenerateDefaultImageList(images_per_card);
+        GenerateDefaultImageList(images_per_card);
         GenerateDeck(images_per_card);
 
-        /* Loading Screen */
-//        print_progressbar(20, 1000);
+        /* Print Header */
         clearWithHeader();
 
         /* Main Menu Options */
         main_menu();
     }
 
-    // Setter function for entries
-    public static void setEntries(int images_per_card, String[] items) {
-        if (!isPrime(images_per_card - 1)) {
-            throw new RuntimeException("Number of symbols is not 1 more than a prime number");
-        }
+    /* Timer Helper Methods */
 
-        int num_of_cards = getNumberOfImages(images_per_card);
-        if (items.length < num_of_cards) {
-            throw new RuntimeException("Number of cards is less than required");
-        }
+    static long stopwatch_start_time;
+    static long lapTime;
+    public static long StartStopwatch() {
+        return stopwatch_start_time = System.currentTimeMillis();
+    }
 
-        entries = items;
+    public static void SetLap() {
+        lapTime = System.currentTimeMillis();
+    }
+
+    public static long GetTimeElapsed() {
+        return System.currentTimeMillis() - stopwatch_start_time;
+    }
+
+    public static long GetTimeSinceLastLap() {
+        return System.currentTimeMillis() - lapTime;
     }
 
     /* Miscellaneous Helper Methods */
-
-    /**
-     * Prints a Progressbar
-     * My take on the progress bar inspired by <a href="https://stackoverflow.com/questions/852665/command-line-progress-bar-in-java">...</a>
-     * Inspired by Qazi
-     *
-     * @param length:   Number of Icons
-     * @param interval: Interval between icon loading
-     */
-    public static void print_progressbar(int length, long interval) {
-        char incomplete = '.';
-        char complete = '=';
-
-        // Create a string of incomplete chars
-        String progressBar = "";
-        for (int i = 0; i < length; i++) {
-            // Stringbuilder would be better here but I can't be bothered to read documentation
-            progressBar += String.valueOf(incomplete);
-        }
-
-        // Iteratively update it to fill with complete chars every interval
-        for (int i = 0; i < length; i++) {
-            progressBar = progressBar.substring(0, i) + String.valueOf(complete) + progressBar.substring(i + 1);
-            System.out.print("\r" + progressBar);
-
-            try {
-                Thread.sleep(interval); // pause the thread
-            } catch (InterruptedException error) {
-
-            }
-        }
-        System.out.println(progressBar);
-    }
 
     public static void print_seperator() {
         int dashes = 20;
@@ -438,7 +410,7 @@ public class Main {
      *
      * @return An array of string representation of numbers
      */
-    public static String[] GenerateDefaultImageList(int images_per_card) {
+    public static void GenerateDefaultImageList(int images_per_card) {
         int num_of_images = getNumberOfImages(images_per_card);
         String[] images = new String[num_of_images];
 
@@ -446,7 +418,7 @@ public class Main {
             images[i] = String.valueOf(i);
         }
 
-        return images;
+        entries = images;
     }
 
     /**
@@ -461,7 +433,7 @@ public class Main {
             throw new RuntimeException("Number of symbols is not 1 more than a prime number");
         }
 
-        entries = GenerateDefaultImageList(images_per_card);
+        GenerateDefaultImageList(images_per_card);
 
         int num_of_cards = getNumberOfImages(images_per_card);
 
@@ -622,7 +594,8 @@ public class Main {
                 rounds = (int) (Math.random() * 3) + 2;
         }
 
-        System.out.printf("%d rounds\n GO!\n", rounds);
+        System.out.printf(WHITE_BOLD + "%d rounds\n", rounds);
+        System.out.println("Go!" + RESET);
 
         int score = 0;
 
@@ -632,7 +605,8 @@ public class Main {
         for (int i = 0; i < rounds; i++) {
             String correct_answer = printTwoCards();
 
-            String guess = readLine(WHITE_BOLD_BRIGHT + "What's the common element? " + RESET).trim();
+            String prompt = String.format(WHITE_BOLD_BRIGHT + "Round %d / %d: What's the common element? " + RESET, i + 1, rounds);
+            String guess = readLine(prompt).trim();
 
             if (guess.equals(correct_answer)) {
                 System.out.println(GREEN_BOLD_BRIGHT + "Correct! +1" + RESET);
@@ -685,7 +659,6 @@ public class Main {
 
     public static void endless_mode(Difficulty difficulty) {
         int score = 0;
-        int cardLength = deck.length;
         String guess, correct_answer;
         long currentTime = System.currentTimeMillis();
 
@@ -698,19 +671,24 @@ public class Main {
                 score++;
                 System.out.println("Correct!");
             } else {
-                System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n", correct_answer);
+                System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n" + RESET, correct_answer);
             }
 
         } while (guess.equals(correct_answer));
 
+        System.out.println();
         double time = (double) (System.currentTimeMillis() - currentTime) / 1000;
         System.out.printf("You got %d correct! Completed in %.2f seconds\n", score, time);
+
+        if (endlessModeHighscore < 0 || endlessModeHighscore < score) {
+            System.out.printf("New Highscore ! %.2f\n", (double) score);
+            endlessModeHighscore = score;
+        }
     }
 
     public static void timed_variant(Difficulty difficulty) {
         double total_time = 20;
-        int score = 0;
-        int cardLength = deck.length;
+        double score = 0;
         String guess, correct_answer;
 
         System.out.print(WHITE_BOLD_BRIGHT);
@@ -726,6 +704,7 @@ public class Main {
             System.out.println("Something Unexpected happened!");
             return;
         }
+
         System.out.print(RESET);
 
         long startTime = System.currentTimeMillis();
@@ -752,11 +731,22 @@ public class Main {
                 score++;
                 System.out.println(GREEN_BOLD_BRIGHT + "Correct!" + RESET);
             } else {
-                System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n", correct_answer);
+                System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n" + RESET, correct_answer);
             }
         } while (true);
 
-        System.out.printf("You ran out of time! You got a score of %d\n", score);
+        System.out.println();
+        System.out.printf("You ran out of time! You got a score of %.2f\n", score);
+
+        if (timedVariantHighscore < 0 || timedVariantHighscore < score) {
+            System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET, score);
+            timedVariantHighscore = score;
+        }
+
+        if (fastestCompleted < 0 || fastestCompleted < timeElapsed) {
+            System.out.printf("New Fastest Completed !" + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET, timeElapsed);
+            fastestCompleted = timeElapsed;
+        }
     }
 
     /* Menu Methods */
@@ -815,6 +805,7 @@ public class Main {
                 System.out.println();
             }
         } while (true);
+        System.out.println();
 
         return modes[chosen_option - 1];
     }
