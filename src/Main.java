@@ -110,20 +110,32 @@ public class Main {
         main_menu();
     }
 
-    /* Timer Helper Methods */
+    /* Timer Helper Methods
+    *
+    * Methods that help with keeping track of time
+    *
+    * */
+
 
     static long stopwatch_start_time;
     static long lapTime;
+
     public static long StartStopwatch() {
-        return stopwatch_start_time = System.currentTimeMillis();
+        stopwatch_start_time = System.currentTimeMillis();
+        lapTime = stopwatch_start_time;
+        return stopwatch_start_time;
     }
 
-    public static void SetLap() {
+    public static void ResetLap() {
         lapTime = System.currentTimeMillis();
     }
 
     public static long GetTimeElapsed() {
         return System.currentTimeMillis() - stopwatch_start_time;
+    }
+
+    public static double GetTimeElapsedSeconds() {
+        return (double) GetTimeElapsed() / 1000;
     }
 
     public static long GetTimeSinceLastLap() {
@@ -138,15 +150,6 @@ public class Main {
             System.out.print("-");
         }
         System.out.println();
-    }
-
-    public static boolean containsString(String match, String[] items) {
-        for (String item : items) {
-            if (item.equals(match)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -196,24 +199,6 @@ public class Main {
         return current_num;
     }
 
-    // I wanted to create a console gradient effect
-    public static void console_gradient(String message, int interval, int duration) {
-        int[] colors = {30, 31, 32, 33, 34, 35, 36, 37, 90, 91, 92, 93, 94, 95, 96, 97};
-        int iterations = duration / interval;
-
-        for (int i = 0;i < iterations;i++) {
-            for (int color : colors) {
-                System.out.printf("\033[0;%dm\r%s", color, message);
-
-                try {
-                    Thread.sleep(interval);
-                } catch (InterruptedException error) {
-
-                }
-            }
-        }
-    }
-
     // AHNAF THIS IS UR SECTION
 //    public static void print_card(int card_id) {
 //        int[] elements = deck[card_id];
@@ -260,12 +245,12 @@ public class Main {
 //        repeat("-", length + 2);
 //        System.out.println();
 //    }
-
-    public static void repeat(String type, int repetition) {
-        for (int i = 0;i < repetition;i++) {
-            System.out.print(type);
-        }
-    }
+//
+//    public static void repeat(String type, int repetition) {
+//        for (int i = 0;i < repetition;i++) {
+//            System.out.print(type);
+//        }
+//    }
 
     public static void clear() {
         System.out.print("\033[H\033[2J");
@@ -308,22 +293,6 @@ public class Main {
         System.out.print(prompt);
         return input.nextLine();
     }
-
-
-    public static String readNonEmptyLine(String prompt, String error_message) {
-        String result;
-        do {
-            result = readLine(prompt);
-
-            if (result.isEmpty() && !error_message.isEmpty()) {
-//                System.out.print(error_message);
-            }
-        } while (result.isEmpty());
-
-        return result;
-    }
-
-    /* Spot it Helper Methods */
 
     /**
      * Get the total number of images based on the amount of images per card
@@ -599,8 +568,7 @@ public class Main {
 
         int score = 0;
 
-        long startTime = System.currentTimeMillis();
-        long previousTime = startTime;
+        StartStopwatch();
 
         for (int i = 0; i < rounds; i++) {
             String correct_answer = printTwoCards();
@@ -615,14 +583,11 @@ public class Main {
                 System.out.printf(RED_BOLD_BRIGHT + "Not correct :( The correct answer was %s\n" + RESET, correct_answer);
             }
 
-            long currentTime = System.currentTimeMillis();
-            double timeElapsed = (double) (currentTime - previousTime) / 1000;
-
             System.out.print("Completed in" + GREEN_BOLD_BRIGHT);
-            System.out.printf(" %.2fs\n", timeElapsed);
+            System.out.printf(" %.2fs\n", (double) GetTimeSinceLastLap());
             System.out.println(RESET);
 
-            previousTime = currentTime;
+            ResetLap();
         }
 
         System.out.printf(GREEN_BOLD_BRIGHT + "%d / %d Correct\n" + RESET, score, rounds);
@@ -634,7 +599,7 @@ public class Main {
         double percentage = (double) score / rounds;
 
         // Time calculations
-        double totalTime = (double) (System.currentTimeMillis() - startTime) / 1000;
+        double totalTime = GetTimeElapsedSeconds();
         double averageTime = totalTime / rounds;
         // TODO: Better time bonus calculation
         double timeBonus = score / totalTime * 3;
@@ -660,7 +625,8 @@ public class Main {
     public static void endless_mode(Difficulty difficulty) {
         int score = 0;
         String guess, correct_answer;
-        long currentTime = System.currentTimeMillis();
+
+        StartStopwatch();
 
         do {
             correct_answer = printTwoCards();
@@ -677,7 +643,7 @@ public class Main {
         } while (guess.equals(correct_answer));
 
         System.out.println();
-        double time = (double) (System.currentTimeMillis() - currentTime) / 1000;
+        double time = GetTimeElapsedSeconds();
         System.out.printf("You got %d correct! Completed in %.2f seconds\n", score, time);
 
         if (endlessModeHighscore < 0 || endlessModeHighscore < score) {
@@ -707,25 +673,22 @@ public class Main {
 
         System.out.print(RESET);
 
-        long startTime = System.currentTimeMillis();
-        long previousTime = startTime;
-        double timeElapsed;
+        StartStopwatch();
 
         do {
             correct_answer = printTwoCards();
 
             guess = readLine(WHITE_BOLD_BRIGHT + "What's the common element? " + RESET).trim();
 
-            long currentTime = System.currentTimeMillis();
-            timeElapsed = (double) (currentTime - startTime) / 1000;
+            double timeElapsed = GetTimeElapsedSeconds();
 
             if (timeElapsed > total_time) {
                 break;
             }
 
-            double timeSinceLastQuestion = (double) (currentTime - previousTime) / 1000;
+            double timeSinceLastQuestion = (double) GetTimeSinceLastLap() / 1000;
             System.out.printf("Completed in %.2fs. %.2f total time remaining\n", timeSinceLastQuestion, total_time - timeElapsed);
-            previousTime = currentTime;
+            ResetLap();
 
             if (guess.equals(correct_answer)) {
                 score++;
@@ -743,6 +706,7 @@ public class Main {
             timedVariantHighscore = score;
         }
 
+        double timeElapsed = GetTimeElapsed();
         if (fastestCompleted < 0 || fastestCompleted < timeElapsed) {
             System.out.printf("New Fastest Completed !" + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET, timeElapsed);
             fastestCompleted = timeElapsed;
@@ -818,7 +782,6 @@ public class Main {
 
         do {
             // Print Menu Options
-
             System.out.println(WHITE_UNDERLINED + WHITE_BOLD_BRIGHT + "Game Modes" + RESET);
             System.out.println(RED_BACKGROUND + "Normal Mode [1]" + RESET);
             System.out.println(BLUE_BACKGROUND + "Endless Mode [2]" + RESET);
@@ -829,9 +792,8 @@ public class Main {
             // Recieve input
             command = readLine("(Enter the Command) ");
 
-            if (command.equalsIgnoreCase("quit") || command.equalsIgnoreCase("q")) {
-                break;
-            }
+            // Shuffle the whole deck cause why not?
+            ShuffleWholeDeck();
 
             System.out.println();
             Difficulty mode;
@@ -852,7 +814,8 @@ public class Main {
                     timed_variant(mode);
                     readLine("(Press enter to continue) ");
                     break;
-
+                case "q":
+                    continue;
                 // Handle default case
                 default:
                     readLine("Unknown Command (Press enter to continue) ");
@@ -863,7 +826,7 @@ public class Main {
             clearWithHeader();
 
         // End when the command matches "quit"
-        } while (true);
+        } while (!command.equalsIgnoreCase("q"));
     }
 
     /**
@@ -885,11 +848,6 @@ public class Main {
             // Read in the command
             command = readLine("(Enter the Command) ");
 
-            if (command.equalsIgnoreCase("quit") || command.equalsIgnoreCase("q")) {
-                System.out.println("Why you leave :(");
-                break;
-            }
-
             // Check command against the available options
             switch (command.toLowerCase()) {
                 case "1":
@@ -910,13 +868,15 @@ public class Main {
                     );
                     readLine("(Press enter to continue) ");
                     break;
+                case "q":
+                    System.out.println("Why you leave :(");
                 default:
                     readLine("Unknown Command (Press enter to continue) ");
                     break;
             }
 
             clearWithHeader();
-        } while (true);
+        } while (!command.equalsIgnoreCase("q"));
     }
 
     // Print out a card
