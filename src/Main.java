@@ -15,6 +15,11 @@ public class Main {
     static double timedVariantHighscore = -1;
     static double fastestCompleted = -1;
 
+    /* Declarations for Stopwatch methods */
+
+    static long stopwatch_start_time;
+    static long lapTime;
+
     /* Declaration of Objects */
     static Scanner input;
 
@@ -116,28 +121,34 @@ public class Main {
     *
     * */
 
-
-    static long stopwatch_start_time;
-    static long lapTime;
-
+    /**
+     */
     public static long StartStopwatch() {
         stopwatch_start_time = System.currentTimeMillis();
         lapTime = stopwatch_start_time;
         return stopwatch_start_time;
     }
 
+    /**
+     */
     public static void ResetLap() {
         lapTime = System.currentTimeMillis();
     }
 
+    /**
+     */
     public static long GetTimeElapsed() {
         return System.currentTimeMillis() - stopwatch_start_time;
     }
 
+    /**
+     */
     public static double GetTimeElapsedSeconds() {
         return (double) GetTimeElapsed() / 1000;
     }
 
+    /**
+     */
     public static long GetTimeSinceLastLap() {
         return System.currentTimeMillis() - lapTime;
     }
@@ -402,9 +413,9 @@ public class Main {
             throw new RuntimeException("Number of symbols is not 1 more than a prime number");
         }
 
-        GenerateDefaultImageList(images_per_card);
-
         int num_of_cards = getNumberOfImages(images_per_card);
+
+        GenerateDefaultImageList(images_per_card);
 
         /* Custom Spot it Generation Algorithm Implementation */
         // Inspired by https://www.101computing.net/the-dobble-algorithm/
@@ -479,6 +490,8 @@ public class Main {
      * Prompt user for an int and perform basic input validation checks which include
      * input mismatch and whether the value is non-positive or non-negative
      *
+     * The urge to add a callback as a parameter...
+     *
      * @param prompt Prompt to provide the user
      * @param checkPositive If true will prompt the user for only positive values
      *
@@ -500,6 +513,7 @@ public class Main {
 
             } catch (InputMismatchException error) {
                 System.out.println("Please input a positive integer");
+                input.nextLine();
             }
         } while (true); // I know this is bad practice...
 
@@ -507,10 +521,6 @@ public class Main {
     }
 
     /* Game Mode Methods */
-    // TODO: Add more game modes
-    // TODO: Add difficulty settings
-    // TODO: Add score calculations
-
     /**
      * Chooses two cards at random prints them
      *
@@ -534,34 +544,17 @@ public class Main {
      *  Normal Mode
      */
     public static void normal_mode(Difficulty difficulty) {
-        int rounds = 1;
 
-        switch (difficulty) {
-            case SUPER_HARD:
-                GenerateDeck(8);
-                rounds = 10;
-                break;
-            case HARD:
-                GenerateDeck(6);
-                rounds = 15;
-                break;
-            case INTERMEDIATE:
-                GenerateDeck(4);
-                rounds = 20;
-                break;
-            case EASY:
-                GenerateDeck(3);
-                rounds = 25;
-                break;
-            case CUSTOM:
-                rounds = readIntWithInputValidation(WHITE_BOLD_BRIGHT + "How many rounds do you wish to play? " + RESET, true);
-                break;
-            case RANDOM:
-                int randomPrime = (int) (Math.random() * 3) + 2;
-                int randomDeckSize = findNthPrime(randomPrime) + 1;
-                GenerateDeck(randomDeckSize);
-                rounds = (int) (Math.random() * 3) + 2;
-        }
+        // I do not take credit for this, this was simplification was thanks to intelliji
+        int rounds = switch (difficulty) {
+            case SUPER_HARD -> 10;
+            case HARD -> 15;
+            case INTERMEDIATE -> 20;
+            case EASY -> 25;
+            case CUSTOM ->
+                    readIntWithInputValidation(WHITE_BOLD_BRIGHT + "How many rounds do you wish to play? " + RESET, true);
+            case RANDOM -> (int) (Math.random() * 3) + 2;
+        };
 
         System.out.printf(WHITE_BOLD + "%d rounds\n", rounds);
         System.out.println("Go!" + RESET);
@@ -601,7 +594,6 @@ public class Main {
         // Time calculations
         double totalTime = GetTimeElapsedSeconds();
         double averageTime = totalTime / rounds;
-        // TODO: Better time bonus calculation
         double timeBonus = score / totalTime * 3;
 
         // Printing out statistics
@@ -623,6 +615,28 @@ public class Main {
     }
 
     public static void endless_mode(Difficulty difficulty) {
+        switch (difficulty) {
+            case SUPER_HARD:
+                GenerateDeck(8);
+                break;
+            case HARD:
+                GenerateDeck(6);
+                break;
+            case INTERMEDIATE:
+                GenerateDeck(4);
+                break;
+            case EASY:
+                GenerateDeck(3);
+                break;
+            case CUSTOM:
+//                int deckSize = GenerateDeck();
+                break;
+            case RANDOM:
+                int randomPrime = (int) (Math.random() * 3) + 2;
+                int randomDeckSize = findNthPrime(randomPrime) + 1;
+                GenerateDeck(randomDeckSize);
+        }
+
         int score = 0;
         String guess, correct_answer;
 
@@ -653,7 +667,15 @@ public class Main {
     }
 
     public static void timed_variant(Difficulty difficulty) {
-        double total_time = 20;
+        double total_time = switch (difficulty) {
+            case SUPER_HARD -> 60;
+            case HARD -> 45;
+            case INTERMEDIATE -> 30;
+            case EASY -> 15;
+            case CUSTOM -> readIntWithInputValidation("How long do you want?", true);
+            case RANDOM -> (int) (Math.random() * 60);
+        };
+
         double score = 0;
         String guess, correct_answer;
 
@@ -771,7 +793,35 @@ public class Main {
         } while (true);
         System.out.println();
 
-        return modes[chosen_option - 1];
+        Difficulty difficulty = modes[chosen_option - 1];
+
+        switch (difficulty) {
+            case SUPER_HARD:
+                GenerateDeck(8);
+                break;
+            case HARD:
+                GenerateDeck(6);
+                break;
+            case INTERMEDIATE:
+                GenerateDeck(4);
+                break;
+            case EASY:
+                GenerateDeck(3);
+                break;
+            case CUSTOM:
+                int deckSize;
+                do {
+                    deckSize = readIntWithInputValidation("how skibidi of you", true);
+                } while (!isPrime(deckSize - 1  ));
+                GenerateDeck(deckSize);
+                break;
+            case RANDOM:
+                int randomPrime = (int) (Math.random() * 3) + 2;
+                int randomDeckSize = findNthPrime(randomPrime) + 1;
+                GenerateDeck(randomDeckSize);
+        }
+
+        return difficulty;
     }
 
     /**
@@ -862,6 +912,7 @@ public class Main {
                 case "3":
                     clearWithHeader();
                     System.out.println(
+                        WHITE_UNDERLINED + WHITE_BOLD_BRIGHT + "Rules\n" + RESET +
                         """
                         Spot it is a very skibidi game
                         """
@@ -870,6 +921,8 @@ public class Main {
                     break;
                 case "q":
                     System.out.println("Why you leave :(");
+                    readLine("Press Enter to finish ");
+                    break;
                 default:
                     readLine("Unknown Command (Press enter to continue) ");
                     break;
