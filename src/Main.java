@@ -122,11 +122,10 @@ public class Main {
     * */
 
     /**
+     *
      */
-    public static long StartStopwatch() {
-        stopwatch_start_time = System.currentTimeMillis();
-        lapTime = stopwatch_start_time;
-        return stopwatch_start_time;
+    public static void StartStopwatch() {
+        lapTime = stopwatch_start_time = System.currentTimeMillis();
     }
 
     /**
@@ -155,14 +154,6 @@ public class Main {
 
     /* Miscellaneous Helper Methods */
 
-    public static void print_seperator() {
-        int dashes = 20;
-        for (int i = 0;i < dashes;i++) {
-            System.out.print("-");
-        }
-        System.out.println();
-    }
-
     /**
      * Helper method to determine whether a given value is prime
      *
@@ -171,6 +162,10 @@ public class Main {
      * @return Boolean value indicating whether n is prime
      */
     public static boolean isPrime(int n) {
+        if (n < 2) {
+            return false;
+        }
+
         // iterate from 2...n - 1, checking if n is divisible by it
         for (int i = 2;i < n;i++) {
             // return false if n is divisible by i (a number that is not 1 or n itself)
@@ -257,11 +252,11 @@ public class Main {
 //        System.out.println();
 //    }
 //
-//    public static void repeat(String type, int repetition) {
-//        for (int i = 0;i < repetition;i++) {
-//            System.out.print(type);
-//        }
-//    }
+    public static void repeat(String type, int repetition) {
+        for (int i = 0;i < repetition;i++) {
+            System.out.print(type);
+        }
+    }
 
     public static void clear() {
         System.out.print("\033[H\033[2J");
@@ -285,6 +280,10 @@ public class Main {
                 By Raiyan Islam and Ahnaf Masud
                \s"""
         );
+    }
+
+    public static void resetText() {
+        System.out.print(RESET);
     }
 
     /**
@@ -314,6 +313,10 @@ public class Main {
      */
     public static int getNumberOfImages(int images_per_card) {
         return (int) Math.pow(images_per_card, 2) - images_per_card + 1;
+    }
+
+    public static int randomInt(int min, int max) {
+        return min + (int) (Math.random() * (max - min));
     }
 
     /**
@@ -499,6 +502,8 @@ public class Main {
     public static int readIntWithInputValidation(String prompt, boolean checkPositive) {
         int num;
 
+        String error_msg = "Please input a positive integer";
+
         do {
             // try/catch statement to catch InputMismatchExceptions from the scanner
             try {
@@ -509,10 +514,10 @@ public class Main {
                     break;
                 }
 
-                System.out.println("Please input a positive integer");
+                System.out.println(error_msg);
 
             } catch (InputMismatchException error) {
-                System.out.println("Please input a positive integer");
+                System.out.println(error_msg);
                 input.nextLine();
             }
         } while (true); // I know this is bad practice...
@@ -546,52 +551,61 @@ public class Main {
     public static void normal_mode(Difficulty difficulty) {
 
         // I do not take credit for this, this was simplification was thanks to intelliji
+        // Handles setting number of rounds based on difficulty level
         int rounds = switch (difficulty) {
             case SUPER_HARD -> 10;
             case HARD -> 15;
             case INTERMEDIATE -> 20;
             case EASY -> 25;
+            // Prompt the user for the number of rounds
             case CUSTOM ->
                     readIntWithInputValidation(WHITE_BOLD_BRIGHT + "How many rounds do you wish to play? " + RESET, true);
-            case RANDOM -> (int) (Math.random() * 3) + 2;
+            // Chooses a random number of rounds from 2 -> 7
+            case RANDOM -> randomInt(2, 7);
         };
 
-        System.out.printf(WHITE_BOLD + "%d rounds\n", rounds);
-        System.out.println("Go!" + RESET);
+        // Printing number of rounds applied
+        System.out.printf(WHITE_BOLD + "%d round(s)\nGo!\n" + RESET, rounds);
 
         int score = 0;
-
-        StartStopwatch();
+        StartStopwatch(); // Starting stop watch (sets current time)
 
         for (int i = 0; i < rounds; i++) {
-            String correct_answer = printTwoCards();
+            String correct_answer = printTwoCards(); // Prints two cards and prints their common element
 
-            String prompt = String.format(WHITE_BOLD_BRIGHT + "Round %d / %d: What's the common element? " + RESET, i + 1, rounds);
-            String guess = readLine(prompt).trim();
+            // Prompt the user for the correct element
+            System.out.printf(WHITE_BOLD_BRIGHT + "Round %d / %d: What's the common element? " + RESET, i + 1, rounds);
+            String guess = input.nextLine().trim();
 
+            // Handle answer
             if (guess.equals(correct_answer)) {
-                System.out.println(GREEN_BOLD_BRIGHT + "Correct! +1" + RESET);
+                System.out.println(GREEN_BOLD_BRIGHT + "Correct! +1");
                 score++;
             } else {
-                System.out.printf(RED_BOLD_BRIGHT + "Not correct :( The correct answer was %s\n" + RESET, correct_answer);
+                System.out.printf(RED_BOLD_BRIGHT + "Not correct :( The correct answer was %s\n", correct_answer);
             }
 
-            System.out.print("Completed in" + GREEN_BOLD_BRIGHT);
-            System.out.printf(" %.2fs\n", (double) GetTimeSinceLastLap());
-            System.out.println(RESET);
-
-            ResetLap();
+            resetText();
+            System.out.printf("Completed in" + GREEN_BOLD_BRIGHT + " %.2fs\n\n" + RESET, (double) GetTimeSinceLastLap() / 1000);
+            ResetLap(); // Resets the lap allowing to get the time elapsed since the previous question
         }
+
+        /* Stats page for normal mode */
 
         System.out.printf(GREEN_BOLD_BRIGHT + "%d / %d Correct\n" + RESET, score, rounds);
 
-        print_seperator();
+        // Stats page header
+        repeat("-", 20);
+        System.out.println();
         System.out.print(CYAN_BRIGHT);
         System.out.println("Stats");
 
-        double percentage = (double) score / rounds;
+        double percentage = (double) score / rounds; // Percentage of correct answers
 
-        // Time calculations
+        /* Time calculations
+
+           The current time bonus calculation is...
+        */
         double totalTime = GetTimeElapsedSeconds();
         double averageTime = totalTime / rounds;
         double timeBonus = score / totalTime * 3;
@@ -605,48 +619,32 @@ public class Main {
 
         double score_calculation = percentage * 10 + timeBonus;
 
+        // Sets highscore
         if (normalModeHighscore < 0 || normalModeHighscore < score_calculation) {
             System.out.println("New Highscore !");
             normalModeHighscore = score_calculation;
         }
-        System.out.printf("Score: %.2f", score_calculation);
-        // System.out.printf("Rank");
-        System.out.println(RESET);
+
+        System.out.printf("Score: %.2f" + RESET, score_calculation);
+        System.out.println();
     }
 
-    public static void endless_mode(Difficulty difficulty) {
-        switch (difficulty) {
-            case SUPER_HARD:
-                GenerateDeck(8);
-                break;
-            case HARD:
-                GenerateDeck(6);
-                break;
-            case INTERMEDIATE:
-                GenerateDeck(4);
-                break;
-            case EASY:
-                GenerateDeck(3);
-                break;
-            case CUSTOM:
-//                int deckSize = GenerateDeck();
-                break;
-            case RANDOM:
-                int randomPrime = (int) (Math.random() * 3) + 2;
-                int randomDeckSize = findNthPrime(randomPrime) + 1;
-                GenerateDeck(randomDeckSize);
-        }
-
+    public static void endless_mode() {
+        // Declarations
         int score = 0;
+        int currentRounds = 0;
         String guess, correct_answer;
 
-        StartStopwatch();
+        StartStopwatch(); // Set current time
 
         do {
-            correct_answer = printTwoCards();
+            correct_answer = printTwoCards(); // Print two cards and get the common element between them
 
-            guess = readLine("What's the common element? ").trim();
+            // Prompt user
+            System.out.printf(WHITE_BOLD_BRIGHT + "Round %d : What's the common element? " + RESET, currentRounds);
+            guess = input.nextLine().trim();
 
+            // Handle right/wrong answer
             if (guess.equals(correct_answer)) {
                 score++;
                 System.out.println("Correct!");
@@ -654,83 +652,107 @@ public class Main {
                 System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n" + RESET, correct_answer);
             }
 
+            // Completion stats
+            System.out.printf("Completed in" + GREEN_BOLD_BRIGHT + " %.2fs\n\n" + RESET, (double) GetTimeSinceLastLap() / 1000);
+            ResetLap();
+
+            currentRounds++; // Increment rounds
         } while (guess.equals(correct_answer));
 
+        // Displays stats facts
         System.out.println();
-        double time = GetTimeElapsedSeconds();
-        System.out.printf("You got %d correct! Completed in %.2f seconds\n", score, time);
+        System.out.printf("You got %d correct! Completed in" + GREEN_BOLD_BRIGHT + " %.2f seconds\n" + RESET, score, GetTimeElapsedSeconds());
 
+        // Updates highscore
         if (endlessModeHighscore < 0 || endlessModeHighscore < score) {
-            System.out.printf("New Highscore ! %.2f\n", (double) score);
+            System.out.printf("New Highscore!" + GREEN_BOLD_BRIGHT + " %.2f\n" + RESET, (double) score);
             endlessModeHighscore = score;
         }
     }
 
     public static void timed_variant(Difficulty difficulty) {
-        double total_time = switch (difficulty) {
+        // Determine amount of time for each setting
+        int total_time = switch (difficulty) {
             case SUPER_HARD -> 60;
             case HARD -> 45;
             case INTERMEDIATE -> 30;
             case EASY -> 15;
-            case CUSTOM -> readIntWithInputValidation("How long do you want?", true);
-            case RANDOM -> (int) (Math.random() * 60);
+            // Prompts user for amount of time to play with
+            case CUSTOM -> readIntWithInputValidation("How long do you want? ", true);
+            case RANDOM -> randomInt(20, 120); // Random amount of time
         };
 
-        double score = 0;
+        int score = 0;
+        int rounds = 0;
         String guess, correct_answer;
+        double timeElapsed;
 
+        // Countdown
         System.out.print(WHITE_BOLD_BRIGHT);
         try {
-            System.out.print("3... ");
-            Thread.sleep(1000);
-            System.out.print("2... ");
-            Thread.sleep(1000);
-            System.out.print("1... ");
-            Thread.sleep(1000);
-            System.out.println("\nGo!");
+            for (int i = 3;i > 0;i--) {
+                System.out.printf("%d... ", i);
+                Thread.sleep(1000);
+            }
         } catch (InterruptedException ignored) {
-            System.out.println("Something Unexpected happened!");
+            System.out.println("Something Unexpected happened! Quitting game");
             return;
         }
 
-        System.out.print(RESET);
+        System.out.println();
+        System.out.printf("Go! You have %d seconds\n", total_time);
 
+        resetText();
         StartStopwatch();
 
         do {
             correct_answer = printTwoCards();
-
             guess = readLine(WHITE_BOLD_BRIGHT + "What's the common element? " + RESET).trim();
 
-            double timeElapsed = GetTimeElapsedSeconds();
+            timeElapsed = GetTimeElapsedSeconds();
 
-            if (timeElapsed > total_time) {
-                break;
+            if (timeElapsed < total_time) {
+                if (guess.equals(correct_answer)) {
+                    score++;
+                    System.out.println(GREEN_BOLD_BRIGHT + "Correct!");
+                } else {
+                    System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n", correct_answer);
+                }
+                resetText();
+
+                double timeSinceLastQuestion = (double) GetTimeSinceLastLap() / 1000;
+                System.out.printf("Completed in %.2fs. %.2f total time remaining\n", timeSinceLastQuestion, total_time - timeElapsed);
+                ResetLap();
+
+                rounds++;
             }
+        } while (timeElapsed < total_time);
 
-            double timeSinceLastQuestion = (double) GetTimeSinceLastLap() / 1000;
-            System.out.printf("Completed in %.2fs. %.2f total time remaining\n", timeSinceLastQuestion, total_time - timeElapsed);
-            ResetLap();
+        // Stats page header
+        repeat("-", 20);
+        System.out.println();
+        System.out.print(CYAN_BRIGHT);
+        System.out.println("Stats");
 
-            if (guess.equals(correct_answer)) {
-                score++;
-                System.out.println(GREEN_BOLD_BRIGHT + "Correct!" + RESET);
-            } else {
-                System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n" + RESET, correct_answer);
-            }
-        } while (true);
+        double percentage = (double) score / rounds;
+        double averageTime = timeElapsed / rounds;
+        double score_calculation = score;
+        double timeBonus = score / timeElapsed * 3;
 
         System.out.println();
-        System.out.printf("You ran out of time! You got a score of %.2f\n", score);
+        System.out.printf("You ran out of time! You got a score of %.2f\n", score_calculation);
+        System.out.printf("%.2f%% Percentage Correct\n", percentage * 100);
+        System.out.printf("Total time %ds\n", total_time);
+        System.out.printf("Average time %.2fs\n", timeBonus);
+        System.out.printf("Time Bonus: %.2f\n", averageTime);
 
         if (timedVariantHighscore < 0 || timedVariantHighscore < score) {
-            System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET, score);
+            System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + " %.2f\n" + RESET, score_calculation);
             timedVariantHighscore = score;
         }
 
-        double timeElapsed = GetTimeElapsed();
         if (fastestCompleted < 0 || fastestCompleted < timeElapsed) {
-            System.out.printf("New Fastest Completed !" + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET, timeElapsed);
+            System.out.printf("New Fastest Completed !" + GREEN_BOLD_BRIGHT +  " %.2f\n" + RESET, timeElapsed);
             fastestCompleted = timeElapsed;
         }
     }
@@ -738,32 +760,31 @@ public class Main {
     /* Menu Methods */
 
     public static void view_score() {
+        String highscore_prompt = "Highscore: " + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET;
         System.out.println(RED_BOLD_BRIGHT + RED_UNDERLINED + "Normal Mode" + RESET);
         if (normalModeHighscore < 0) {
             System.out.println("You don't have a highscore for normal mode yet!");
         } else {
-            System.out.print("Highscore: " + GREEN_BOLD_BRIGHT);
-            System.out.printf("%.2f\n", normalModeHighscore);
+            System.out.printf(highscore_prompt, normalModeHighscore);
         }
-        System.out.println(RESET);
+        System.out.println();
 
         System.out.println(BLUE_BOLD_BRIGHT + BLUE_UNDERLINED + "Endless Mode" + RESET);
         if (endlessModeHighscore < 0) {
             System.out.println("You don't have a highscore for endless mode yet!");
         } else {
-            System.out.print("Highscore: " + GREEN_BOLD_BRIGHT);
-            System.out.printf("%.2f\n", endlessModeHighscore);
+            System.out.printf(highscore_prompt, endlessModeHighscore);
         }
-        System.out.println(RESET);
+        System.out.println();
 
         System.out.println(YELLOW_BOLD_BRIGHT + YELLOW_UNDERLINED + "Time Out Mode" + RESET);
         if (timedVariantHighscore < 0) {
             System.out.println("You don't have a highscore for variant mode yet!");
         } else {
-            System.out.print("Highscore: " + GREEN_BOLD_BRIGHT);
-            System.out.printf("%.2f\n", timedVariantHighscore);
+            System.out.printf(highscore_prompt, timedVariantHighscore);
+            System.out.printf("Fastest completed" + GREEN_BOLD_BRIGHT + " %.1f\n" + RESET, fastestCompleted);
         }
-        System.out.println(RESET);
+        System.out.println();
     }
 
     public static Difficulty handleDifficultySelection() {
@@ -795,31 +816,29 @@ public class Main {
 
         Difficulty difficulty = modes[chosen_option - 1];
 
-        switch (difficulty) {
-            case SUPER_HARD:
-                GenerateDeck(8);
-                break;
-            case HARD:
-                GenerateDeck(6);
-                break;
-            case INTERMEDIATE:
-                GenerateDeck(4);
-                break;
-            case EASY:
-                GenerateDeck(3);
-                break;
-            case CUSTOM:
+        int size = switch (difficulty) {
+            case SUPER_HARD -> 8;
+            case HARD -> 6;
+            case INTERMEDIATE -> 4;
+            case EASY -> 3;
+
+            case CUSTOM -> {
                 int deckSize;
                 do {
-                    deckSize = readIntWithInputValidation("how skibidi of you", true);
-                } while (!isPrime(deckSize - 1  ));
-                GenerateDeck(deckSize);
-                break;
-            case RANDOM:
-                int randomPrime = (int) (Math.random() * 3) + 2;
-                int randomDeckSize = findNthPrime(randomPrime) + 1;
-                GenerateDeck(randomDeckSize);
-        }
+                    deckSize = readIntWithInputValidation("Custom Deck Size (Must be one more than a prime): ", true);
+                } while (!isPrime(deckSize - 1));
+
+                yield deckSize;
+            }
+
+            case RANDOM -> {
+                int randomPrime = randomInt(2, 5);
+
+                yield findNthPrime(randomPrime) + 1;
+            }
+        };
+
+        GenerateDeck(size);
 
         return difficulty;
     }
@@ -855,8 +874,8 @@ public class Main {
                     readLine("(Press enter to continue) ");
                     break;
                 case "2":
-                    mode = handleDifficultySelection();
-                    endless_mode(mode);
+                    handleDifficultySelection();
+                    endless_mode();
                     readLine("(Press enter to continue) ");
                     break;
                 case "3":
@@ -899,7 +918,7 @@ public class Main {
             command = readLine("(Enter the Command) ");
 
             // Check command against the available options
-            switch (command.toLowerCase()) {
+            switch (command) {
                 case "1":
                     clearWithHeader();
                     start_game();
