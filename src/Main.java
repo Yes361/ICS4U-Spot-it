@@ -1,3 +1,12 @@
+/*
+Authors: Raiyan Islam and Ahnaf Masud
+Date: 03/07/2025
+Program Name: Spot it
+Description:
+Spot it is a skibidi game
+
+*/
+
 import java.util.*;
 
 public class Main {
@@ -8,17 +17,20 @@ public class Main {
     static String[] entries;
 
     /* Declarations for variables related to Score */
+
     // Default initialized to -1 to represent that a score wasn't obtained
     static double normalModeHighscore = -1;
     static double endlessModeHighscore = -1;
-
     static double timedVariantHighscore = -1;
     static double fastestCompleted = -1;
 
-    /* Declarations for Stopwatch methods */
+    /* Declarations for Stopwatch Variables */
 
     static long stopwatch_start_time;
     static long lapTime;
+    static long pauseTime;
+    static long pauseOffset;
+    static boolean paused;
 
     /* Declaration of Objects */
     static Scanner input;
@@ -36,83 +48,80 @@ public class Main {
     // Copied from https://www.w3schools.blog/ansi-colors-java
 
     public static final String RESET = "\033[0m";  // Text Reset
-    // Regular Colors
-    public static final String BLACK = "\033[0;30m";   // BLACK
-    public static final String RED = "\033[0;31m";     // RED
-    public static final String GREEN = "\033[0;32m";   // GREEN
-    public static final String YELLOW = "\033[0;33m";  // YELLOW
-    public static final String BLUE = "\033[0;34m";    // BLUE
-    public static final String PURPLE = "\033[0;35m";  // PURPLE
-    public static final String CYAN = "\033[0;36m";    // CYAN
-    public static final String WHITE = "\033[0;37m";   // WHITE
     // Bold
-    public static final String BLACK_BOLD = "\033[1;30m";  // BLACK
-    public static final String RED_BOLD = "\033[1;31m";    // RED
-    public static final String GREEN_BOLD = "\033[1;32m";  // GREEN
-    public static final String YELLOW_BOLD = "\033[1;33m"; // YELLOW
-    public static final String BLUE_BOLD = "\033[1;34m";   // BLUE
-    public static final String PURPLE_BOLD = "\033[1;35m"; // PURPLE
-    public static final String CYAN_BOLD = "\033[1;36m";   // CYAN
     public static final String WHITE_BOLD = "\033[1;37m";  // WHITE
     // Underline
-    public static final String BLACK_UNDERLINED = "\033[4;30m";  // BLACK
     public static final String RED_UNDERLINED = "\033[4;31m";    // RED
-    public static final String GREEN_UNDERLINED = "\033[4;32m";  // GREEN
     public static final String YELLOW_UNDERLINED = "\033[4;33m"; // YELLOW
     public static final String BLUE_UNDERLINED = "\033[4;34m";   // BLUE
-    public static final String PURPLE_UNDERLINED = "\033[4;35m"; // PURPLE
-    public static final String CYAN_UNDERLINED = "\033[4;36m";   // CYAN
     public static final String WHITE_UNDERLINED = "\033[4;37m";  // WHITE
     // Background
-    public static final String BLACK_BACKGROUND = "\033[40m";  // BLACK
     public static final String RED_BACKGROUND = "\033[41m";    // RED
     public static final String GREEN_BACKGROUND = "\033[42m";  // GREEN
     public static final String YELLOW_BACKGROUND = "\033[43m"; // YELLOW
     public static final String BLUE_BACKGROUND = "\033[44m";   // BLUE
     public static final String PURPLE_BACKGROUND = "\033[45m"; // PURPLE
-    public static final String CYAN_BACKGROUND = "\033[46m";   // CYAN
-    public static final String WHITE_BACKGROUND = "\033[47m";  // WHITE
     // High Intensity
-    public static final String BLACK_BRIGHT = "\033[0;90m";  // BLACK
-    public static final String RED_BRIGHT = "\033[0;91m";    // RED
-    public static final String GREEN_BRIGHT = "\033[0;92m";  // GREEN
-    public static final String YELLOW_BRIGHT = "\033[0;93m"; // YELLOW
-    public static final String BLUE_BRIGHT = "\033[0;94m";   // BLUE
-    public static final String PURPLE_BRIGHT = "\033[0;95m"; // PURPLE
     public static final String CYAN_BRIGHT = "\033[0;96m";   // CYAN
-    public static final String WHITE_BRIGHT = "\033[0;97m";  // WHITE
     // Bold High Intensity
-    public static final String BLACK_BOLD_BRIGHT = "\033[1;90m"; // BLACK
     public static final String RED_BOLD_BRIGHT = "\033[1;91m";   // RED
     public static final String GREEN_BOLD_BRIGHT = "\033[1;92m"; // GREEN
     public static final String YELLOW_BOLD_BRIGHT = "\033[1;93m";// YELLOW
     public static final String BLUE_BOLD_BRIGHT = "\033[1;94m";  // BLUE
-    public static final String PURPLE_BOLD_BRIGHT = "\033[1;95m";// PURPLE
-    public static final String CYAN_BOLD_BRIGHT = "\033[1;96m";  // CYAN
     public static final String WHITE_BOLD_BRIGHT = "\033[1;97m"; // WHITE
-    // High Intensity backgrounds
-    public static final String BLACK_BACKGROUND_BRIGHT = "\033[0;100m";// BLACK
-    public static final String RED_BACKGROUND_BRIGHT = "\033[0;101m";// RED
-    public static final String GREEN_BACKGROUND_BRIGHT = "\033[0;102m";// GREEN
-    public static final String YELLOW_BACKGROUND_BRIGHT = "\033[0;103m";// YELLOW
-    public static final String BLUE_BACKGROUND_BRIGHT = "\033[0;104m";// BLUE
-    public static final String PURPLE_BACKGROUND_BRIGHT = "\033[0;105m"; // PURPLE
-    public static final String CYAN_BACKGROUND_BRIGHT = "\033[0;106m";  // CYAN
-    public static final String WHITE_BACKGROUND_BRIGHT = "\033[0;107m";   // WHITE
-
     public static void main(String[] args) {
         input = new Scanner(System.in);
 
-        /* Generate a default deck of cards */
-        int images_per_card = 3;
-        GenerateDefaultImageList(images_per_card);
-        GenerateDeck(images_per_card);
-
-        /* Print Header */
-        clearWithHeader();
+        // Default deck
+        GenerateDeck(3);
 
         /* Main Menu Options */
-        main_menu();
+        String command;
+
+        clearWithHeader();
+        do {
+
+            // Main menu Options
+            System.out.println(WHITE_BOLD_BRIGHT + WHITE_UNDERLINED + "Menu Options" + RESET);
+            System.out.println(GREEN_BACKGROUND + "New Game [1]" + RESET);
+            System.out.println(BLUE_BACKGROUND + "Scores [2]" + RESET);
+            System.out.println(RED_BACKGROUND + "Rules [3]" + RESET);
+            System.out.println(PURPLE_BACKGROUND + "Quit [Q]" + RESET);
+            System.out.println();
+
+            // Read in the command
+            command = readLine("(Enter the Command) ");
+
+            // Check command against the available options
+            switch (command) {
+                case "1":
+                    start_game();
+                    break;
+                case "2":
+                    view_score();
+                    readLine("(Press enter to continue) ");
+                    break;
+                case "3":
+                    clearWithHeader();
+                    System.out.println(
+                        WHITE_UNDERLINED + WHITE_BOLD_BRIGHT + "Rules\n" + RESET +
+                        """
+                        Spot it is a very skibidi game
+                        """
+                    );
+                    readLine("(Press enter to continue) ");
+                    break;
+                case "q":
+                    System.out.println("Why you leave :(");
+                    readLine("Press Enter to finish ");
+                    break;
+                default:
+                    readLine("Unknown Command (Press enter to continue) ");
+                    break;
+            }
+
+            clearWithHeader();
+        } while (!command.equalsIgnoreCase("q"));
     }
 
     /* Timer Helper Methods
@@ -126,6 +135,18 @@ public class Main {
      */
     public static void StartStopwatch() {
         lapTime = stopwatch_start_time = System.currentTimeMillis();
+        pauseTime = 0;
+        pauseOffset = 0;
+    }
+
+    public static void pauseStopWatch() {
+        pauseTime = System.currentTimeMillis();
+        paused = true;
+    }
+
+    public static void unpauseStopWatch() {
+        pauseOffset = System.currentTimeMillis() - pauseTime;
+        paused = false;
     }
 
     /**
@@ -133,11 +154,10 @@ public class Main {
     public static void ResetLap() {
         lapTime = System.currentTimeMillis();
     }
-
     /**
      */
     public static long GetTimeElapsed() {
-        return System.currentTimeMillis() - stopwatch_start_time;
+        return System.currentTimeMillis() - stopwatch_start_time - pauseOffset;
     }
 
     /**
@@ -149,7 +169,8 @@ public class Main {
     /**
      */
     public static long GetTimeSinceLastLap() {
-        return System.currentTimeMillis() - lapTime;
+        long difference = System.currentTimeMillis() - lapTime;
+        return lapTime < pauseTime ? difference - pauseOffset : difference;
     }
 
     /* Miscellaneous Helper Methods */
@@ -205,53 +226,6 @@ public class Main {
         return current_num;
     }
 
-    // AHNAF THIS IS UR SECTION
-//    public static void print_card(int card_id) {
-//        int[] elements = deck[card_id];
-//        int len = elements.length;
-//
-//        double side = Math.sqrt(len);
-//
-//        int row = (int) Math.ceil(side);
-//        int col = (int) Math.round(side);
-//
-//        String[][] grid = new String[row][col];
-//
-//        for (int i = 0; i < len; i++) {
-//            int x = i / row;
-//            int y = i % row;
-//            grid[x][y] = entries[elements[i]];
-//        }
-//
-//        int length =  row * 3 + 2;
-//        repeat("-", length + 2);
-//        System.out.println();
-//        for (int i = 0;i < col;i++) {
-//            System.out.print("|");
-//            repeat(" ", length);
-//            System.out.print("|\n");
-//
-//            System.out.print("|");
-//            int j;
-//            for (j = 0;j < row;j++) {
-//                if (grid[i][j] != null) {
-//                    System.out.printf("  %s", grid[i][j]);
-//                } else {
-//                    break;
-//                }
-//            }
-//            for (int k = j;k < row;k++) {
-//                System.out.print("   ");
-//            }
-//            System.out.println("  |");
-//        }
-//        System.out.print("|");
-//        repeat(" ", length);
-//        System.out.println("|");
-//        repeat("-", length + 2);
-//        System.out.println();
-//    }
-//
     public static void repeat(String type, int repetition) {
         for (int i = 0;i < repetition;i++) {
             System.out.print(type);
@@ -387,11 +361,20 @@ public class Main {
     }
 
     /**
+     * Print out a card
+     */
+    public static void print_card(int idx) {
+        for (int index : deck[idx]) {
+            System.out.printf("%s, ", entries[index]);
+        }
+        System.out.println();
+    }
+
+    /**
      * Generates a list of images that are just numbers
      *
      * @param images_per_card Symbols per card
      *
-     * @return An array of string representation of numbers
      */
     public static void GenerateDefaultImageList(int images_per_card) {
         int num_of_images = getNumberOfImages(images_per_card);
@@ -492,7 +475,6 @@ public class Main {
     /**
      * Prompt user for an int and perform basic input validation checks which include
      * input mismatch and whether the value is non-positive or non-negative
-     *
      * The urge to add a callback as a parameter...
      *
      * @param prompt Prompt to provide the user
@@ -531,7 +513,7 @@ public class Main {
      *
      * @return Returns the common element between the cards
      */
-    public static String printTwoCards() {
+    public static String printTwoRandomCards() {
         int[] choiceIndex = pickTwoIndices(deck.length - 1);
         int first_choice = choiceIndex[0];
         int second_choice = choiceIndex[1];
@@ -545,6 +527,22 @@ public class Main {
         return entries[FindCommonElement(first_choice, second_choice)];
     }
 
+    public static void print_time_completion() {
+        double seconds = (double) GetTimeSinceLastLap() / 1000;
+        System.out.printf("Completed in" + GREEN_BOLD_BRIGHT + " %.2fs. " + RESET, seconds);
+        ResetLap(); // Resets the lap allowing to get the time elapsed since the previous question
+    }
+
+    public static boolean confirm_exit() {
+        pauseStopWatch();
+        String confirm = readLine("Quit round early? (y/n) ");
+
+        if (confirm.equalsIgnoreCase("y")) return true;
+        unpauseStopWatch();
+
+        return false;
+    }
+
     /**
      *  Normal Mode
      */
@@ -552,7 +550,7 @@ public class Main {
 
         // I do not take credit for this, this was simplification was thanks to intelliji
         // Handles setting number of rounds based on difficulty level
-        int rounds = switch (difficulty) {
+        int total_rounds = switch (difficulty) {
             case SUPER_HARD -> 10;
             case HARD -> 15;
             case INTERMEDIATE -> 20;
@@ -565,17 +563,19 @@ public class Main {
         };
 
         // Printing number of rounds applied
-        System.out.printf(WHITE_BOLD + "%d round(s)\nGo!\n" + RESET, rounds);
+        System.out.printf(WHITE_BOLD + "%d round(s)\nGo!\n" + RESET, total_rounds);
 
         int score = 0;
         StartStopwatch(); // Starting stop watch (sets current time)
 
-        for (int i = 0; i < rounds; i++) {
-            String correct_answer = printTwoCards(); // Prints two cards and prints their common element
+        for (int round = 0; round < total_rounds; round++) {
+            String correct_answer = printTwoRandomCards(); // Prints two cards and prints their common element
 
             // Prompt the user for the correct element
-            System.out.printf(WHITE_BOLD_BRIGHT + "Round %d / %d: What's the common element? " + RESET, i + 1, rounds);
+            System.out.printf(WHITE_BOLD_BRIGHT + "Round %d / %d: What's the common element? " + RESET, round + 1, total_rounds);
             String guess = input.nextLine().trim();
+
+            if (guess.isEmpty() && confirm_exit()) return;
 
             // Handle answer
             if (guess.equals(correct_answer)) {
@@ -586,13 +586,13 @@ public class Main {
             }
 
             resetText();
-            System.out.printf("Completed in" + GREEN_BOLD_BRIGHT + " %.2fs\n\n" + RESET, (double) GetTimeSinceLastLap() / 1000);
-            ResetLap(); // Resets the lap allowing to get the time elapsed since the previous question
+           print_time_completion();
+           System.out.print("\n\n");
         }
 
         /* Stats page for normal mode */
 
-        System.out.printf(GREEN_BOLD_BRIGHT + "%d / %d Correct\n" + RESET, score, rounds);
+        System.out.printf(GREEN_BOLD_BRIGHT + "%d / %d Correct\n" + RESET, score, total_rounds);
 
         // Stats page header
         repeat("-", 20);
@@ -600,14 +600,14 @@ public class Main {
         System.out.print(CYAN_BRIGHT);
         System.out.println("Stats");
 
-        double percentage = (double) score / rounds; // Percentage of correct answers
+        double percentage = (double) score / total_rounds; // Percentage of correct answers
 
         /* Time calculations
 
            The current time bonus calculation is...
         */
         double totalTime = GetTimeElapsedSeconds();
-        double averageTime = totalTime / rounds;
+        double averageTime = totalTime / total_rounds;
         double timeBonus = score / totalTime * 3;
 
         // Printing out statistics
@@ -638,23 +638,25 @@ public class Main {
         StartStopwatch(); // Set current time
 
         do {
-            correct_answer = printTwoCards(); // Print two cards and get the common element between them
+            correct_answer = printTwoRandomCards(); // Print two cards and get the common element between them
 
             // Prompt user
             System.out.printf(WHITE_BOLD_BRIGHT + "Round %d : What's the common element? " + RESET, currentRounds);
             guess = input.nextLine().trim();
 
+            if (guess.isEmpty() && confirm_exit()) return;
+
             // Handle right/wrong answer
             if (guess.equals(correct_answer)) {
                 score++;
-                System.out.println("Correct!");
+                System.out.println(GREEN_BOLD_BRIGHT + "Correct!");
             } else {
-                System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n" + RESET, correct_answer);
+                System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n", correct_answer);
             }
 
-            // Completion stats
-            System.out.printf("Completed in" + GREEN_BOLD_BRIGHT + " %.2fs\n\n" + RESET, (double) GetTimeSinceLastLap() / 1000);
-            ResetLap();
+            resetText();
+            print_time_completion();
+            System.out.print("\n\n");
 
             currentRounds++; // Increment rounds
         } while (guess.equals(correct_answer));
@@ -689,14 +691,14 @@ public class Main {
 
         // Countdown
         System.out.print(WHITE_BOLD_BRIGHT);
-        try {
-            for (int i = 3;i > 0;i--) {
-                System.out.printf("%d... ", i);
+        for (int i = 3;i > 0;i--) {
+            System.out.printf("%d... ", i);
+            try {
                 Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+                System.out.println("Something Unexpected happened! Quitting game");
+                return;
             }
-        } catch (InterruptedException ignored) {
-            System.out.println("Something Unexpected happened! Quitting game");
-            return;
         }
 
         System.out.println();
@@ -706,8 +708,10 @@ public class Main {
         StartStopwatch();
 
         do {
-            correct_answer = printTwoCards();
+            correct_answer = printTwoRandomCards();
             guess = readLine(WHITE_BOLD_BRIGHT + "What's the common element? " + RESET).trim();
+
+            if (guess.isEmpty() && confirm_exit()) return;
 
             timeElapsed = GetTimeElapsedSeconds();
 
@@ -718,11 +722,10 @@ public class Main {
                 } else {
                     System.out.printf(RED_BOLD_BRIGHT + "Wrong, the correct answer was %s\n", correct_answer);
                 }
-                resetText();
 
-                double timeSinceLastQuestion = (double) GetTimeSinceLastLap() / 1000;
-                System.out.printf("Completed in %.2fs. %.2f total time remaining\n", timeSinceLastQuestion, total_time - timeElapsed);
-                ResetLap();
+                resetText();
+                print_time_completion();
+                System.out.printf("Remaining time" + WHITE_BOLD_BRIGHT + " %ds\n\n", (int) (total_time - timeElapsed));
 
                 rounds++;
             }
@@ -734,10 +737,11 @@ public class Main {
         System.out.print(CYAN_BRIGHT);
         System.out.println("Stats");
 
+        double totalTime = (double) GetTimeSinceLastLap() / 1000;
         double percentage = (double) score / rounds;
-        double averageTime = timeElapsed / rounds;
+        double averageTime = totalTime / rounds;
         double score_calculation = score;
-        double timeBonus = score / timeElapsed * 3;
+        double timeBonus = score / totalTime * 3;
 
         System.out.println();
         System.out.printf("You ran out of time! You got a score of %.2f\n", score_calculation);
@@ -751,15 +755,17 @@ public class Main {
             timedVariantHighscore = score;
         }
 
-        if (fastestCompleted < 0 || fastestCompleted < timeElapsed) {
-            System.out.printf("New Fastest Completed !" + GREEN_BOLD_BRIGHT +  " %.2f\n" + RESET, timeElapsed);
-            fastestCompleted = timeElapsed;
+        if (fastestCompleted < 0 || fastestCompleted < totalTime) {
+            System.out.printf("New Fastest Completed !" + GREEN_BOLD_BRIGHT +  " %.2f\n" + RESET, totalTime);
+            fastestCompleted = totalTime;
         }
     }
 
     /* Menu Methods */
 
     public static void view_score() {
+        clearWithHeader();
+
         String highscore_prompt = "Highscore: " + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET;
         System.out.println(RED_BOLD_BRIGHT + RED_UNDERLINED + "Normal Mode" + RESET);
         if (normalModeHighscore < 0) {
@@ -847,6 +853,7 @@ public class Main {
      * Menu Method for Game Modes
      */
     public static void start_game() {
+        clearWithHeader();
         String command;
 
         do {
@@ -896,66 +903,5 @@ public class Main {
 
         // End when the command matches "quit"
         } while (!command.equalsIgnoreCase("q"));
-    }
-
-    /**
-     * Main Menu
-     */
-    public static void main_menu() {
-        String command;
-
-        do {
-
-            // Main menu Options
-            System.out.println(WHITE_BOLD_BRIGHT + WHITE_UNDERLINED + "Menu Options" + RESET);
-            System.out.println(GREEN_BACKGROUND + "New Game [1]" + RESET);
-            System.out.println(BLUE_BACKGROUND + "Scores [2]" + RESET);
-            System.out.println(RED_BACKGROUND + "Rules [3]" + RESET);
-            System.out.println(PURPLE_BACKGROUND + "Quit [Q]" + RESET);
-            System.out.println();
-
-            // Read in the command
-            command = readLine("(Enter the Command) ");
-
-            // Check command against the available options
-            switch (command) {
-                case "1":
-                    clearWithHeader();
-                    start_game();
-                    break;
-                case "2":
-                    clearWithHeader();
-                    view_score();
-                    readLine("(Press enter to continue) ");
-                    break;
-                case "3":
-                    clearWithHeader();
-                    System.out.println(
-                        WHITE_UNDERLINED + WHITE_BOLD_BRIGHT + "Rules\n" + RESET +
-                        """
-                        Spot it is a very skibidi game
-                        """
-                    );
-                    readLine("(Press enter to continue) ");
-                    break;
-                case "q":
-                    System.out.println("Why you leave :(");
-                    readLine("Press Enter to finish ");
-                    break;
-                default:
-                    readLine("Unknown Command (Press enter to continue) ");
-                    break;
-            }
-
-            clearWithHeader();
-        } while (!command.equalsIgnoreCase("q"));
-    }
-
-    // Print out a card
-    public static void print_card(int idx) {
-        for (int index : deck[idx]) {
-            System.out.printf("%s, ", entries[index]);
-        }
-        System.out.println();
     }
 }
