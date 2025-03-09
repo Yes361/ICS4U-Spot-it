@@ -44,6 +44,17 @@ public class Main {
         RANDOM,
     }
 
+    static int ARBITRARY_SIZE_LIMIT = 8; // Arbitrarily chosen because I can and I am the God of this program
+
+    static String[] theme_list = {"default", "sports"}; // maybe not useful
+    static int current_theme_selector = 0; // points to default
+
+    static String[] sports_theme = {
+        "Ball", "Bat", "Helmet", "Glove", "Skate",
+        "Whistle", "Net", "Racket", "Puck", "Jersey",
+        "Cone", "Stick", "Board", "Shoe", "Goal"
+    };
+
     /* Declaration for Console Colors */
     // Copied from https://www.w3schools.blog/ansi-colors-java
 
@@ -61,6 +72,7 @@ public class Main {
     public static final String YELLOW_BACKGROUND = "\033[43m"; // YELLOW
     public static final String BLUE_BACKGROUND = "\033[44m";   // BLUE
     public static final String PURPLE_BACKGROUND = "\033[45m"; // PURPLE
+    public static final String CYAN_BACKGROUND = "\033[46m";   // CYAN
     // High Intensity
     public static final String CYAN_BRIGHT = "\033[0;96m";   // CYAN
     // Bold High Intensity
@@ -69,6 +81,7 @@ public class Main {
     public static final String YELLOW_BOLD_BRIGHT = "\033[1;93m";// YELLOW
     public static final String BLUE_BOLD_BRIGHT = "\033[1;94m";  // BLUE
     public static final String WHITE_BOLD_BRIGHT = "\033[1;97m"; // WHITE
+
     public static void main(String[] args) {
         input = new Scanner(System.in);
 
@@ -86,6 +99,8 @@ public class Main {
             System.out.println(GREEN_BACKGROUND + "New Game [1]" + RESET);
             System.out.println(BLUE_BACKGROUND + "Scores [2]" + RESET);
             System.out.println(RED_BACKGROUND + "Rules [3]" + RESET);
+            System.out.println(YELLOW_BACKGROUND + "Choose Deck Theme [4]" + RESET);
+            System.out.println(CYAN_BACKGROUND + "Debug [D]" + RESET);
             System.out.println(PURPLE_BACKGROUND + "Quit [Q]" + RESET);
             System.out.println();
 
@@ -93,7 +108,7 @@ public class Main {
             command = readLine("(Enter the Command) ");
 
             // Check command against the available options
-            switch (command) {
+            switch (command.toLowerCase()) {
                 case "1":
                     start_game();
                     break;
@@ -111,6 +126,18 @@ public class Main {
                     );
                     readLine("(Press enter to continue) ");
                     break;
+                case "4":
+                    System.out.printf("The current theme is %s\n\n", theme_list[current_theme_selector]);
+                    current_theme_selector = select_option("(Select a theme) ", theme_list);
+                    String current_theme = theme_list[current_theme_selector];
+
+                    if (current_theme.equals("sports")) {
+                        entries = sports_theme;
+                    }
+                    break;
+                case "d":
+                    debug_console();
+                    break;
                 case "q":
                     System.out.println("Why you leave :(");
                     readLine("Press Enter to finish ");
@@ -122,6 +149,36 @@ public class Main {
 
             clearWithHeader();
         } while (!command.equalsIgnoreCase("q"));
+    }
+
+    public static void view_score() {
+        clearWithHeader();
+
+        String highscore_prompt = "Highscore: " + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET;
+        System.out.println(RED_BOLD_BRIGHT + RED_UNDERLINED + "Normal Mode" + RESET);
+        if (normalModeHighscore < 0) {
+            System.out.println("You don't have a highscore for normal mode yet!");
+        } else {
+            System.out.printf(highscore_prompt, normalModeHighscore);
+        }
+        System.out.println();
+
+        System.out.println(BLUE_BOLD_BRIGHT + BLUE_UNDERLINED + "Endless Mode" + RESET);
+        if (endlessModeHighscore < 0) {
+            System.out.println("You don't have a highscore for endless mode yet!");
+        } else {
+            System.out.printf(highscore_prompt, endlessModeHighscore);
+        }
+        System.out.println();
+
+        System.out.println(YELLOW_BOLD_BRIGHT + YELLOW_UNDERLINED + "Time Out Mode" + RESET);
+        if (timedVariantHighscore < 0) {
+            System.out.println("You don't have a highscore for variant mode yet!");
+        } else {
+            System.out.printf(highscore_prompt, timedVariantHighscore);
+            System.out.printf("Fastest completed" + GREEN_BOLD_BRIGHT + " %.1f\n" + RESET, fastestCompleted);
+        }
+        System.out.println();
     }
 
     /* Timer Helper Methods
@@ -403,7 +460,9 @@ public class Main {
 
         int num_of_cards = getNumberOfImages(images_per_card);
 
-        GenerateDefaultImageList(images_per_card);
+        if (current_theme_selector == 0) {
+            GenerateDefaultImageList(images_per_card);
+        }
 
         /* Custom Spot it Generation Algorithm Implementation */
         // Inspired by https://www.101computing.net/the-dobble-algorithm/
@@ -688,7 +747,6 @@ public class Main {
 
         int score = 0;
         int rounds = 0;
-        String guess, correct_answer;
         double timeElapsed;
 
         // Countdown
@@ -710,8 +768,8 @@ public class Main {
         StartStopwatch();
 
         do {
-            correct_answer = printTwoRandomCards();
-            guess = readLine(WHITE_BOLD_BRIGHT + "What's the common element? " + RESET).trim();
+            String correct_answer = printTwoRandomCards();
+            String guess = readLine(WHITE_BOLD_BRIGHT + "What's the common element? " + RESET).trim();
 
             if (guess.isEmpty() && confirm_exit()) return;
 
@@ -763,63 +821,45 @@ public class Main {
         }
     }
 
-    /* Menu Methods */
+    public static void two_player_mode() {
 
-    public static void view_score() {
-        clearWithHeader();
-
-        String highscore_prompt = "Highscore: " + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET;
-        System.out.println(RED_BOLD_BRIGHT + RED_UNDERLINED + "Normal Mode" + RESET);
-        if (normalModeHighscore < 0) {
-            System.out.println("You don't have a highscore for normal mode yet!");
-        } else {
-            System.out.printf(highscore_prompt, normalModeHighscore);
-        }
-        System.out.println();
-
-        System.out.println(BLUE_BOLD_BRIGHT + BLUE_UNDERLINED + "Endless Mode" + RESET);
-        if (endlessModeHighscore < 0) {
-            System.out.println("You don't have a highscore for endless mode yet!");
-        } else {
-            System.out.printf(highscore_prompt, endlessModeHighscore);
-        }
-        System.out.println();
-
-        System.out.println(YELLOW_BOLD_BRIGHT + YELLOW_UNDERLINED + "Time Out Mode" + RESET);
-        if (timedVariantHighscore < 0) {
-            System.out.println("You don't have a highscore for variant mode yet!");
-        } else {
-            System.out.printf(highscore_prompt, timedVariantHighscore);
-            System.out.printf("Fastest completed" + GREEN_BOLD_BRIGHT + " %.1f\n" + RESET, fastestCompleted);
-        }
-        System.out.println();
     }
 
-    public static Difficulty handleDifficultySelection() {
-
+    public static int select_option(String prompt, String... options) {
+        int optionLen = options.length;
         int chosen_option;
-        Difficulty[] modes = Difficulty.values();
-        int total_modes = modes.length;
 
         do {
-            System.out.println(WHITE_BOLD_BRIGHT + "Difficulty Mode" + RESET);
-            System.out.printf("1)%s Super Hard%s ", WHITE_BOLD_BRIGHT, RESET);
-            System.out.printf("2)%s Hard%s ", WHITE_BOLD_BRIGHT, RESET);
-            System.out.printf("3)%s Intermediate%s ", WHITE_BOLD_BRIGHT, RESET);
-            System.out.printf("4)%s Easy%s ", WHITE_BOLD_BRIGHT, RESET);
-            System.out.printf("5)%s Custom%s ", WHITE_BOLD_BRIGHT, RESET);
-            System.out.printf("6)%s Random%s", WHITE_BOLD_BRIGHT, RESET);
+            for (int i = 0;i < optionLen;i++) {
+                System.out.printf("%d) %s ", i + 1, options[i]);
+            }
             System.out.println();
 
-            chosen_option = readIntWithInputValidation("(Select a difficulty) ", false);
+            chosen_option = readIntWithInputValidation(prompt, false);
 
-            if (1 <= chosen_option && chosen_option <= total_modes) {
-                break;
+            if (1 <= chosen_option && chosen_option <= optionLen) {
+                return chosen_option;
             } else {
                 System.out.println(RED_BOLD_BRIGHT + "Please Select one of the options" + RESET);
                 System.out.println();
             }
         } while (true);
+
+    }
+
+    public static Difficulty handleDifficultySelection() {
+
+        Difficulty[] modes = Difficulty.values();
+
+        int chosen_option = select_option(
+        "(Select a difficulty) ",
+        WHITE_BOLD_BRIGHT + "Super Hard" + RESET,
+                WHITE_BOLD_BRIGHT + "Hard" + RESET,
+                WHITE_BOLD_BRIGHT + "Intermediate" + RESET,
+                WHITE_BOLD_BRIGHT + "Easy" + RESET,
+                WHITE_BOLD_BRIGHT + "Custom" + RESET,
+                WHITE_BOLD_BRIGHT + "Random" + RESET
+        );
         System.out.println();
 
         Difficulty difficulty = modes[chosen_option - 1];
@@ -834,7 +874,10 @@ public class Main {
                 int deckSize;
                 do {
                     deckSize = readIntWithInputValidation("Custom Deck Size (Must be one more than a prime): ", true);
-                } while (!isPrime(deckSize - 1));
+                    if (deckSize > ARBITRARY_SIZE_LIMIT) {
+                        System.out.printf("Hahaha no. Number must be less than %d\n", ARBITRARY_SIZE_LIMIT);
+                    }
+                } while (!isPrime(deckSize - 1) || deckSize > ARBITRARY_SIZE_LIMIT);
 
                 yield deckSize;
             }
@@ -905,5 +948,76 @@ public class Main {
 
         // End when the command matches "quit"
         } while (!command.equalsIgnoreCase("q"));
+    }
+
+    /* Debug Utilities */
+
+    public static void print_deck() {
+        for (int card = 0;card < deck.length;card++) {
+            print_card(card);
+        }
+    }
+
+    public static void debug_console() {
+        clear();
+
+        System.out.println(
+            """        
+            ________  _____________________ ____ ___  ________\s
+            \\______ \\ \\_   _____/\\______   \\    |   \\/  _____/\s
+             |    |  \\ |    __)_  |    |  _/    |   /   \\  ___\s
+             |    `   \\|        \\ |    |   \\    |  /\\    \\_\\  \\
+            /_______  /_______  / |______  /______/  \\______  /
+                    \\/        \\/         \\/                 \\/\s
+            --------------------------------------------------------
+            By Raiyan Islam and Ahnaf Masud
+            
+            Entering Debug Console...
+            """
+        );
+
+        String command;
+        do {
+
+            System.out.println(WHITE_BOLD_BRIGHT + WHITE_UNDERLINED + "Debug Options" + RESET);
+            System.out.println("Generate Deck [gen, 1]");
+            System.out.println("Shuffle Card [shuffle, 2]");
+            System.out.println("Print [print, 3]");
+            System.out.println("Quit [Q]");
+            System.out.println();
+
+            // Read in the command
+            command = readLine("(Enter the Command) ");
+
+            // Check command against the available options
+            switch (command.toLowerCase()) {
+                case "gen", "1":
+                    int deckSize = readIntWithInputValidation("Custom Deck Size (Must be one more than a prime): ", true);
+                    GenerateDeck(deckSize);
+                    print_deck();
+                    break;
+                case "2":
+                    int card_idx = readIntWithInputValidation("Card number (1-indexed): ", true) - 1;
+                    if (card_idx >= deck.length) {
+                        System.out.println("Exceeds deck size returning to debug :(");
+                        break;
+                    }
+                    ShuffleCard(card_idx);
+                    print_deck();
+                    break;
+                case "print", "3":
+                    print_deck();
+                    break;
+                case "q":
+                    System.out.println("Exiting Debug Console...");
+                    break;
+                default:
+                    System.out.println("Unknown command");
+                    break;
+            }
+
+            System.out.println();
+        } while (!command.equalsIgnoreCase("q"));
+
     }
 }
