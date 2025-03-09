@@ -364,10 +364,12 @@ public class Main {
      * Print out a card
      */
     public static void print_card(int idx) {
-        for (int index : deck[idx]) {
-            System.out.printf("%s, ", entries[index]);
+        int[] card = deck[idx];
+        int last = card.length - 1;
+        for (int index = 0;index < last;index++) {
+            System.out.printf("%s, ", entries[card[index]]);
         }
-        System.out.println();
+        System.out.println(entries[card[last]]);
     }
 
     /**
@@ -674,7 +676,7 @@ public class Main {
 
     public static void timed_variant(Difficulty difficulty) {
         // Determine amount of time for each setting
-        int total_time = switch (difficulty) {
+        int time_allotted = switch (difficulty) {
             case SUPER_HARD -> 60;
             case HARD -> 45;
             case INTERMEDIATE -> 30;
@@ -702,7 +704,7 @@ public class Main {
         }
 
         System.out.println();
-        System.out.printf("Go! You have %d seconds\n", total_time);
+        System.out.printf("Go! You have %d seconds\n", time_allotted);
 
         resetText();
         StartStopwatch();
@@ -715,7 +717,7 @@ public class Main {
 
             timeElapsed = GetTimeElapsedSeconds();
 
-            if (timeElapsed < total_time) {
+            if (timeElapsed < time_allotted) {
                 if (guess.equals(correct_answer)) {
                     score++;
                     System.out.println(GREEN_BOLD_BRIGHT + "Correct!");
@@ -725,11 +727,11 @@ public class Main {
 
                 resetText();
                 print_time_completion();
-                System.out.printf("Remaining time" + WHITE_BOLD_BRIGHT + " %ds\n\n", (int) (total_time - timeElapsed));
+                System.out.printf("Remaining time" + WHITE_BOLD_BRIGHT + " %.2fs\n\n" + RESET, time_allotted - timeElapsed);
 
                 rounds++;
             }
-        } while (timeElapsed < total_time);
+        } while (timeElapsed < time_allotted);
 
         // Stats page header
         repeat("-", 20);
@@ -746,7 +748,7 @@ public class Main {
         System.out.println();
         System.out.printf("You ran out of time! You got a score of %.2f\n", score_calculation);
         System.out.printf("%.2f%% Percentage Correct\n", percentage * 100);
-        System.out.printf("Total time %ds\n", total_time);
+        System.out.printf("Total time %.2fs\n", totalTime);
         System.out.printf("Average time %.2fs\n", timeBonus);
         System.out.printf("Time Bonus: %.2f\n", averageTime);
 
