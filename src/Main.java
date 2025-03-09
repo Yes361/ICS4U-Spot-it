@@ -48,6 +48,7 @@ public class Main {
 
     static int current_theme_selector = 0; // points to default
 
+    // this list was compiled by chatgpt, because I can't think of themes
     static String[] random_tools_theme = {
             "Hammer", "Wrench", "Saw", "Drill", "Nail",
             "Screw", "Bolt", "Pliers", "Tape", "Clamp",
@@ -167,8 +168,8 @@ public class Main {
 
     public static void view_score() {
         clearWithHeader();
-
         String highscore_prompt = "Highscore: " + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET;
+
         System.out.println(RED_BOLD_BRIGHT + RED_UNDERLINED + "Normal Mode" + RESET);
         if (normalModeHighscore < 0) {
             System.out.println("You don't have a highscore for normal mode yet!");
@@ -606,13 +607,20 @@ public class Main {
         ResetLap(); // Resets the lap allowing to get the time elapsed since the previous question
     }
 
+    /**
+     * Confirm exit will prompt the user if they wish to quit the gamemode early. It will pause the timers
+     *
+     * @return returns a boolean indicating if whether the user wants to quit the round early
+     */
     public static boolean confirm_exit() {
-        pauseStopWatch();
+        pauseStopWatch(); // Pause stop watch
+        // prompts the user if they wish to quit early
         String confirm = readLine("Quit round early? (y/n) ");
 
+        // Returns true if the user wants to quit early
         if (confirm.equalsIgnoreCase("y")) return true;
-        unpauseStopWatch();
 
+        unpauseStopWatch(); // unpause it
         return false;
     }
 
@@ -809,7 +817,7 @@ public class Main {
         System.out.print(CYAN_BRIGHT);
         System.out.println("Stats");
 
-        double totalTime = (double) GetTimeSinceLastLap() / 1000;
+        double totalTime = GetTimeElapsedSeconds();
         double percentage = (double) score / rounds;
         double averageTime = totalTime / rounds;
         double score_calculation = score;
@@ -817,10 +825,11 @@ public class Main {
 
         System.out.println();
         System.out.printf("You ran out of time! You got a score of %.2f\n", score_calculation);
+        System.out.printf("Total rounds %d\n", rounds);
         System.out.printf("%.2f%% Percentage Correct\n", percentage * 100);
         System.out.printf("Total time %.2fs\n", totalTime);
-        System.out.printf("Average time %.2fs\n", timeBonus);
-        System.out.printf("Time Bonus: %.2f\n", averageTime);
+        System.out.printf("Average time %.2fs\n", averageTime);
+        System.out.printf("Time Bonus: %.2f\n", timeBonus);
 
         if (timedVariantHighscore < 0 || timedVariantHighscore < score) {
             System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + " %.2f\n" + RESET, score_calculation);
@@ -831,10 +840,6 @@ public class Main {
             System.out.printf("New Fastest Completed !" + GREEN_BOLD_BRIGHT +  " %.2f\n" + RESET, totalTime);
             fastestCompleted = totalTime;
         }
-    }
-
-    public static void two_player_mode() {
-
     }
 
     public static int select_option(String prompt, String... options) {
@@ -997,6 +1002,8 @@ public class Main {
             System.out.println("Generate Deck [gen, 1]");
             System.out.println("Shuffle Card [shuffle, 2]");
             System.out.println("Print [print, 3]");
+            System.out.println("Start stopwatch [4]");
+            System.out.println("Get time [5]");
             System.out.println("Quit [Q]");
             System.out.println();
 
@@ -1021,6 +1028,13 @@ public class Main {
                     break;
                 case "print", "3":
                     print_deck();
+                    break;
+                case "4":
+                    StartStopwatch();
+                    break;
+                case "5":
+                    System.out.println(GetTimeElapsedSeconds());
+                    readLine("Press enter to continue ");
                     break;
                 case "q":
                     System.out.println("Exiting Debug Console...");
