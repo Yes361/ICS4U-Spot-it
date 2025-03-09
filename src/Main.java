@@ -155,8 +155,7 @@ public class Main {
                     break;
                 case "q":
                     System.out.println("Why you leave :(");
-                    readLine("Press Enter to finish ");
-                    break;
+                    return;
                 default:
                     readLine("Unknown Command (Press enter to continue) ");
                     break;
@@ -624,6 +623,18 @@ public class Main {
         return false;
     }
 
+
+    public static boolean is_answer_correct(String guess, String correct_answer) {
+        boolean isCorrect = guess.equalsIgnoreCase(correct_answer);
+        if (isCorrect) {
+            System.out.println(GREEN_BOLD_BRIGHT + "Correct! +1");
+        } else {
+            System.out.printf(RED_BOLD_BRIGHT + "Not correct :( The correct answer was %s\n", correct_answer);
+        }
+
+        return isCorrect;
+    }
+
     /**
      *  Normal Mode
      */
@@ -1034,7 +1045,6 @@ public class Main {
                     break;
                 case "5":
                     System.out.println(GetTimeElapsedSeconds());
-                    readLine("Press enter to continue ");
                     break;
                 case "q":
                     System.out.println("Exiting Debug Console...");
