@@ -46,13 +46,21 @@ public class Main {
 
     static int ARBITRARY_SIZE_LIMIT = 8; // Arbitrarily chosen because I can and I am the God of this program
 
-    static String[] theme_list = {"default", "sports"}; // maybe not useful
     static int current_theme_selector = 0; // points to default
 
-    static String[] sports_theme = {
-        "Ball", "Bat", "Helmet", "Glove", "Skate",
-        "Whistle", "Net", "Racket", "Puck", "Jersey",
-        "Cone", "Stick", "Board", "Shoe", "Goal"
+    static String[] random_tools_theme = {
+            "Hammer", "Wrench", "Saw", "Drill", "Nail",
+            "Screw", "Bolt", "Pliers", "Tape", "Clamp",
+            "Brush", "Chisel", "Ruler", "Level", "Hook",
+            "Chain", "Glove", "Wheel", "Ladder", "Rope",
+            "Tape", "Key", "Lock", "Bell", "Cane",
+            "Box", "Book", "Dice", "Card", "Coin",
+            "Mug", "Cup", "Plate", "Fork", "Spoon",
+            "Bowl", "Lid", "Knife", "Broom", "Mop",
+            "Lamp", "Torch", "Bulb", "Fan", "Radio",
+            "Phone", "Clock", "Watch", "Pen", "Pencil",
+            "Eraser", "Paper", "Brush", "Bag", "Hat",
+            "Sock", "Boot", "Ring", "Chain"
     };
 
     /* Declaration for Console Colors */
@@ -127,13 +135,19 @@ public class Main {
                     readLine("(Press enter to continue) ");
                     break;
                 case "4":
-                    System.out.printf("The current theme is %s\n\n", theme_list[current_theme_selector]);
+                    String[] theme_list = {"default", "tools"};
+
+                    System.out.printf("The current theme is" + WHITE_BOLD_BRIGHT + " %s\n\n" + RESET, theme_list[current_theme_selector]);
                     current_theme_selector = select_option("(Select a theme) ", theme_list);
                     String current_theme = theme_list[current_theme_selector];
+                    System.out.println();
 
-                    if (current_theme.equals("sports")) {
-                        entries = sports_theme;
+                    if (current_theme.equals("tools")) {
+                        entries = random_tools_theme;
                     }
+
+                    System.out.printf("Theme set to" + WHITE_BOLD_BRIGHT + " %s\n" + RESET, current_theme);
+                    readLine("(Press enter to continue) ");
                     break;
                 case "d":
                     debug_console();
@@ -545,8 +559,6 @@ public class Main {
     public static int readIntWithInputValidation(String prompt, boolean checkPositive) {
         int num;
 
-        String error_msg = "Please input a positive integer";
-
         do {
             // try/catch statement to catch InputMismatchExceptions from the scanner
             try {
@@ -557,10 +569,10 @@ public class Main {
                     break;
                 }
 
-                System.out.println(error_msg);
+                System.out.println("Please input a positive integer");
 
             } catch (InputMismatchException error) {
-                System.out.println(error_msg);
+                System.out.println("Must be an integer");
                 input.nextLine();
             }
         } while (true); // I know this is bad practice...
@@ -639,7 +651,7 @@ public class Main {
             if (guess.isEmpty() && confirm_exit()) return;
 
             // Handle answer
-            if (guess.equals(correct_answer)) {
+            if (guess.equalsIgnoreCase(correct_answer)) {
                 System.out.println(GREEN_BOLD_BRIGHT + "Correct! +1");
                 score++;
             } else {
@@ -708,7 +720,7 @@ public class Main {
             if (guess.isEmpty() && confirm_exit()) return;
 
             // Handle right/wrong answer
-            if (guess.equals(correct_answer)) {
+            if (guess.equalsIgnoreCase(correct_answer)) {
                 score++;
                 System.out.println(GREEN_BOLD_BRIGHT + "Correct!");
             } else {
@@ -720,7 +732,7 @@ public class Main {
             System.out.print("\n\n");
 
             currentRounds++; // Increment rounds
-        } while (guess.equals(correct_answer));
+        } while (guess.equalsIgnoreCase(correct_answer));
 
         // Displays stats facts
         System.out.println();
@@ -776,7 +788,7 @@ public class Main {
             timeElapsed = GetTimeElapsedSeconds();
 
             if (timeElapsed < time_allotted) {
-                if (guess.equals(correct_answer)) {
+                if (guess.equalsIgnoreCase(correct_answer)) {
                     score++;
                     System.out.println(GREEN_BOLD_BRIGHT + "Correct!");
                 } else {
@@ -827,42 +839,44 @@ public class Main {
 
     public static int select_option(String prompt, String... options) {
         int optionLen = options.length;
-        int chosen_option;
 
         do {
             for (int i = 0;i < optionLen;i++) {
-                System.out.printf("%d) %s ", i + 1, options[i]);
+                System.out.printf("%d)" + WHITE_BOLD_BRIGHT + " %s " + RESET, i + 1, options[i]);
             }
             System.out.println();
 
-            chosen_option = readIntWithInputValidation(prompt, false);
+            String result = readLine(prompt);
 
-            if (1 <= chosen_option && chosen_option <= optionLen) {
+            int chosen_option = -1;
+            try {
+                chosen_option = Integer.parseInt(result) - 1;
+            } catch (NumberFormatException e) {
+                for (int index = 0;index < optionLen;index++) {
+                    if (result.equalsIgnoreCase(options[index])) {
+                        chosen_option = index;
+                        break;
+                    }
+                }
+            }
+
+            if (0 <= chosen_option && chosen_option < optionLen) {
                 return chosen_option;
             } else {
                 System.out.println(RED_BOLD_BRIGHT + "Please Select one of the options" + RESET);
                 System.out.println();
             }
         } while (true);
-
     }
 
     public static Difficulty handleDifficultySelection() {
 
         Difficulty[] modes = Difficulty.values();
 
-        int chosen_option = select_option(
-        "(Select a difficulty) ",
-        WHITE_BOLD_BRIGHT + "Super Hard" + RESET,
-                WHITE_BOLD_BRIGHT + "Hard" + RESET,
-                WHITE_BOLD_BRIGHT + "Intermediate" + RESET,
-                WHITE_BOLD_BRIGHT + "Easy" + RESET,
-                WHITE_BOLD_BRIGHT + "Custom" + RESET,
-                WHITE_BOLD_BRIGHT + "Random" + RESET
-        );
+        int chosen_option = select_option("(Select a difficulty) ", "Super Hard", "Hard", "Intermediate", "Easy", "Custom", "Random");
         System.out.println();
 
-        Difficulty difficulty = modes[chosen_option - 1];
+        Difficulty difficulty = modes[chosen_option];
 
         int size = switch (difficulty) {
             case SUPER_HARD -> 8;
@@ -1010,6 +1024,7 @@ public class Main {
                     break;
                 case "q":
                     System.out.println("Exiting Debug Console...");
+                    readLine("Press enter to confirm ");
                     break;
                 default:
                     System.out.println("Unknown command");
