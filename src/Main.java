@@ -968,7 +968,7 @@ public class Main {
         double timeBonus = score / totalTime * 3;
 
         System.out.println();
-        System.out.printf("You ran out of time! You got a score of %.2f\n", score);
+        System.out.printf("You ran out of time! You got a score of %d\n", score);
         System.out.printf("Total rounds %d\n", rounds);
         System.out.printf("%.2f%% Percentage Correct\n", percentage * 100);
         System.out.printf("Total time %.2fs\n", totalTime);
@@ -978,7 +978,7 @@ public class Main {
         /* Setting new highscores */
 
         if (timedVariantHighscore < 0 || timedVariantHighscore < score) {
-            System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + " %.2f\n" + RESET, score);
+            System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + " %d\n" + RESET, score);
             timedVariantHighscore = score;
         }
 
