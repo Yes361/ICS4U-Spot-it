@@ -2,8 +2,8 @@
     Authors: Raiyan Islam and Ahnaf Masud
     Date: 03/07/2025
     Program Name: Spot it
-    Description: This program emulates a mock of the card game spot it in
-    which players attempt to match images in cards as quickly as possible
+    Description: This program is a digital recreation of the popular card game known as Spot It and also Doppler,
+    in which players attempt to find a common element between two cards as quickly as possible
 */
 
 import java.util.*;
@@ -92,30 +92,33 @@ public class Main {
 
     // Storing the game rules here
     static String game_rules = """
-            1. GAME MODES:
-               - Normal Mode: Play a set number of rounds
-               - Endless Mode: Play until you choose to quit or make a mistake.
-               - Timed Variant: Score as many points as possible within a time limit.
-           \s
-            2. DIFFICULTY LEVELS:
-               - Easy: Smaller deck, longer time limits, forgiving scoring.
-               - Intermediate: Moderate deck size, balanced time limits, slight penalties for mistakes.
-               - Hard: Larger deck, stricter time limits, and higher penalties.
-               - Super Hard: Maximum difficulty—very large deck, minimal time per round, harsh penalties.
-               - Random: Each round has a random difficulty setting.
-               - Custom: Manually configure deck size, number of rounds, and time limits.
-           \s
-            3. GAMEPLAY:
-               - Each round, two cards are displayed.
-               - Players must identify the single matching image between the cards.
-           \s
-            4. SCORING SYSTEM:
-               - Base Points: Earned for correct matches.
-               - Time Bonus: Faster responses earn extra points.
-               - Streak Bonus: Consecutive correct answers increase the score multiplier.
-           \s
-            Good luck and have fun!
-   \s""";
+    Spot it in its simplest form is a game where you compare two cards from a deck to identify what
+    common element you have. For instance, if you have two cards with four elements each as shown before:
+    \s
+    Card 1: a, b, c, d
+    Card 2: e, f, d, g
+    \s
+    Common element : d
+    \s
+    There are a few game mode in this, the various game modes include:
+    \s
+    Normal Mode: The traditional rules of the game, play a set number of rounds, and for each round you get correctly, you earn a point
+    Endless Mode: Keep going until failure! This gamemode continues on until the player gets an incorrect score, in which the game exits!
+    Timed Variant: Given a set amount of time, you must complete as many rounds as possible until the timer is up!
+    \s
+    The difficulty modes include
+    \s
+    Easy: Small sized deck, longer time limits
+    Intermediate: Moderate sized deck, balanced time limits
+    Hard: Larger deck size, stricter time limits
+    Super Hard: Maximum difficult, very large deck, minimal time limit
+    Random: Randomly generates a deck size and or time limit
+    Custom: You are in control of the deck size and or time limit!\s
+    \s
+    For every round you get correct you get a point and at the end you might get a time bonus.
+    \s
+    Good luck and have fun!
+    \s""";
 
     // Main Method !!!
     public static void main(String[] args) {
@@ -261,7 +264,7 @@ public class Main {
 
     public static void unpauseStopWatch() {
         // Adds the total amount of time for which the stopwatch was paused to pauseOffset
-        pauseOffset += System.currentTimeMillis() - pauseTime;
+        pauseOffset = System.currentTimeMillis() - pauseTime;
         paused = false;
     }
 
@@ -291,7 +294,6 @@ public class Main {
         return (double) GetTimeElapsed() / 1000; // conversion from millis -> seconds
     }
 
-    // TODO: FIX THIS CRITICAL ERROR !!!
     /**
      * This method calculates the time since the last lap
      */
@@ -569,26 +571,36 @@ public class Main {
 
         /* Custom Spot it Generation Algorithm Implementation */
         // Inspired by https://www.101computing.net/the-dobble-algorithm/
-        /* Algorithm Explanation
-            TODO: fill in this
-        */
 
         // Initialize new deck size
         deck = new int[num_of_cards][images_per_card];
         int primeN = images_per_card - 1;
 
+        // This handles the first n cards
+        // i.e. in a deck of 3 cards
+        // a b c
+        // a     d e
+        // a         f g
+
         for (int i = 0;i < primeN + 1;i++) {
-            deck[i][0] = 0;
+            deck[i][0] = 0; // Set the first element in each card to 0
+
+            // Fills in the n - 1 spots in each card
             for (int j = 0;j < primeN;j++) {
                 deck[i][j + 1] = (j + 1) + i * primeN;
             }
         }
 
+        // Fills in the rest of the cards
         for (int i = 0;i < primeN;i++) {
             for (int j = 0;j < primeN;j++) {
+                // Gets the index of the current card
                 int idx = primeN * (i + 1) + j + 1;
+
+                // Sets the first element in the card idx
                 deck[idx][0] = i + 1;
 
+                // Performs some calculation to determine the next elements to fill in the current card index
                 for (int k = 0;k < primeN;k++) {
                     deck[idx][k + 1] = primeN + 1 + primeN * k + (i * k + j) % primeN;
                 }
@@ -953,11 +965,10 @@ public class Main {
         double totalTime = GetTimeElapsedSeconds();
         double percentage = (double) score / rounds;
         double averageTime = totalTime / rounds;
-        double score_calculation = score;
         double timeBonus = score / totalTime * 3;
 
         System.out.println();
-        System.out.printf("You ran out of time! You got a score of %.2f\n", score_calculation);
+        System.out.printf("You ran out of time! You got a score of %.2f\n", score);
         System.out.printf("Total rounds %d\n", rounds);
         System.out.printf("%.2f%% Percentage Correct\n", percentage * 100);
         System.out.printf("Total time %.2fs\n", totalTime);
@@ -967,7 +978,7 @@ public class Main {
         /* Setting new highscores */
 
         if (timedVariantHighscore < 0 || timedVariantHighscore < score) {
-            System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + " %.2f\n" + RESET, score_calculation);
+            System.out.printf("New Highscore !" + GREEN_BOLD_BRIGHT + " %.2f\n" + RESET, score);
             timedVariantHighscore = score;
         }
 
