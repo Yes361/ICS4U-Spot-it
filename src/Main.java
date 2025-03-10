@@ -1,10 +1,9 @@
 /*
-Authors: Raiyan Islam and Ahnaf Masud
-Date: 03/07/2025
-Program Name: Spot it
-Description:
-Spot it is a skibidi game
-
+    Authors: Raiyan Islam and Ahnaf Masud
+    Date: 03/07/2025
+    Program Name: Spot it
+    Description: This program emulates a mock of the card game spot it in
+    which players attempt to match images in cards as quickly as possible
 */
 
 import java.util.*;
@@ -14,7 +13,7 @@ public class Main {
 
     // the Deck is a static 2d array of ints, each int symbolizes a symbol which is stored in entries
     static int[][] deck;
-    static String[] entries;
+    static String[] symbols;
 
     /* Declarations for variables related to Score */
 
@@ -91,6 +90,7 @@ public class Main {
     public static final String BLUE_BOLD_BRIGHT = "\033[1;94m";  // BLUE
     public static final String WHITE_BOLD_BRIGHT = "\033[1;97m"; // WHITE
 
+    // Storing the game rules here
     static String game_rules = """
             1. GAME MODES:
                - Normal Mode: Play a set number of rounds
@@ -174,7 +174,7 @@ public class Main {
 
                     // Set theme
                     if (current_theme.equals("tools")) {
-                        entries = random_tools_theme;
+                        symbols = random_tools_theme;
                     }
 
                     // Restate the new theme
@@ -523,10 +523,10 @@ public class Main {
         int last = card.length - 1; // index pointing to the last element in the card
 
         for (int index = 0;index < last;index++) {
-            System.out.printf("%s, ", entries[card[index]]);
+            System.out.printf("%s, ", symbols[card[index]]);
         }
         // Print the last element out individually with no extra commas
-        System.out.println(entries[card[last]]);
+        System.out.println(symbols[card[last]]);
     }
 
     /**
@@ -538,11 +538,11 @@ public class Main {
     public static void GenerateDefaultImageList(int images_per_card) {
         // Initialize entries with a length of the total number of unqiue symbols
         int num_of_images = getNumberOfImages(images_per_card);
-        entries = new String[num_of_images];
+        symbols = new String[num_of_images];
 
         // Create a list of integers
         for (int i = 0;i < num_of_images;i++) {
-            entries[i] = String.valueOf(i);
+            symbols[i] = String.valueOf(i);
         }
     }
 
@@ -697,7 +697,7 @@ public class Main {
         print_card(second_choice);
 
         // Returns the common element between the two cards
-        return entries[FindCommonElement(first_choice, second_choice)];
+        return symbols[FindCommonElement(first_choice, second_choice)];
     }
 
     // Prints the time in which a question was completed
@@ -987,7 +987,7 @@ public class Main {
      * @return The index of the option they choose
      */
     public static int select_option(String prompt, String... options) {
-
+        ResetText();
         do {
             // Print the options side by side with numbers i.e. 1) option1 2) option2 ... 5) option5
             for (int i = 0;i < options.length;i++) {
