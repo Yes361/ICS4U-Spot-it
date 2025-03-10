@@ -199,6 +199,7 @@ public class Main {
         } while (!command.equalsIgnoreCase("q")); // Exits when the command is "q" or "Q"
     }
 
+    // Screen that displays the scores/highscores of the different game mode
     public static void view_score() {
         clearWithHeader();
         String highscore = "Highscore: " + GREEN_BOLD_BRIGHT + "%.2f\n" + RESET; // Highscore string template
@@ -613,6 +614,8 @@ public class Main {
      *
      * @param firstCard Index of the first card in the deck
      * @param secondCard Index of the second card in the deck
+     *
+     * @return Returns the common element between the cards
      */
     public static int FindCommonElement(int firstCard, int secondCard) {
         /*
@@ -659,6 +662,7 @@ public class Main {
      * @param prompt Prompt to provide the user
      * @param checkPositive If true will prompt the user for only positive values
      *
+     * @return Returns the validated int
      */
     public static int readIntWithInputValidation(String prompt, boolean checkPositive) {
         int num = 0;
@@ -1163,6 +1167,7 @@ public class Main {
     public static void debug_console() {
         clear();
 
+        // HEADER
         System.out.println(
             """        
             ________  _____________________ ____ ___  ________\s
@@ -1220,6 +1225,7 @@ public class Main {
                 case "print", "3":
                     print_deck();
                     break;
+                // STOPWATCH METHODS
                 case "4":
                     StartStopwatch();
                     break;
